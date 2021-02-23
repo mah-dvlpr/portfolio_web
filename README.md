@@ -1,16 +1,17 @@
-# portfolio_web
+# Flutter Based Web Page Presenting My Software Portfolio
+This repo is meant to present, and be part of, my software portfolio.
 
-A new Flutter project.
+# How to build and use with any server
+run:
+```
+cd 'path/to/this/project'  
+flutter build web
+```
 
-## Getting Started
+Then set the servers root directory to the absolute path of 'path/to/this/project/build/web/'.
 
-This project is a starting point for a Flutter application.
-
-A few resources to get you started if this is your first Flutter project:
-
-- [Lab: Write your first Flutter app](https://flutter.dev/docs/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://flutter.dev/docs/cookbook)
-
-For help getting started with Flutter, view our
-[online documentation](https://flutter.dev/docs), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
+With Flutter, you can run:
+```
+flutter pub global activate dhttpd
+flutter pub global run dhttpd --path 'path/to/this/project/build/web/'
+```
