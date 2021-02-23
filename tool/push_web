@@ -1,0 +1,21 @@
+#!/bin/bash
+
+# Script for pushing a built web app to my website repo
+if [ "${PWD##*/}" != 'portfolio_web' ]; then
+    echo 'Called from wrong directory!'
+    echo 'run from the project root directory!'
+    exit 0
+fi
+
+START="${PWD}"
+GIT_PATH='./build/web'
+GIT_REPO='git@github.com:mah-dvlpr/mah-dvlpr.github.io.git'
+
+cd "${GIT_PATH}"
+rm -rf .git
+git init
+git checkout -b main
+git add -A
+git commit -am 'Web push'
+git push -f --mirror "${GIT_REPO}"
+cd "${PWD}"
