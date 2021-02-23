@@ -18,6 +18,6 @@ git init
 echo -e "${SRC_REPO}" > README.md
 git checkout -b main
 git add -A
-git commit -am 'Web push'
+git commit -am 'Web build push'
 git push -f --mirror "${TARGET_REPO}"
 cd "${PWD}"
