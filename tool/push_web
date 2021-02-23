@@ -9,13 +9,15 @@ fi
 
 START="${PWD}"
 GIT_PATH='./build/web'
-GIT_REPO='git@github.com:mah-dvlpr/mah-dvlpr.github.io.git'
+TARGET_REPO='git@github.com:mah-dvlpr/mah-dvlpr.github.io.git'
+SRC_REPO="This repo/commit is a snapshot of $(git config --get remote.origin.url | tr ':' '/' | sed -e 's#git@#https://#' -e 's/.git$//')"
 
 cd "${GIT_PATH}"
 rm -rf .git
 git init
+echo "${SRC_REPO}" > README.md
 git checkout -b main
 git add -A
 git commit -am 'Web push'
-git push -f --mirror "${GIT_REPO}"
+git push -f --mirror "${TARGET_REPO}"
 cd "${PWD}"
