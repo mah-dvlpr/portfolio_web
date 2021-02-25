@@ -1,7 +1,15 @@
 import 'package:flutter/material.dart';
+import 'package:portfolio_web/backdrop.dart';
 
 void main() {
-  runApp(MyApp());
+  runApp(BackDropDemo());
+}
+
+class BackDropDemo extends StatelessWidget {
+  @override
+  Widget build(BuildContext context) {
+    return BackDropAnimation();
+  }
 }
 
 class MyApp extends StatelessWidget {

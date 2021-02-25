@@ -1,5 +1,8 @@
 #!/bin/bash
 
+# Exit on error
+set -e
+
 # Script for pushing a built web app to my website repo
 if [ "${PWD##*/}" != 'portfolio_web' ]; then
     echo 'Called from wrong directory!'
