@@ -16,7 +16,9 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController.unbounded(vsync: this, duration: Duration(seconds: 1));
+    // TODO: The framework's unbounded variant of AnimationController is a bit 
+    // odd as of now (1.27.0-4.0.pre). Doing this instead. V
+    _animationController = AnimationController(vsync: this, duration: Duration(seconds: 1));
     _animationController.addListener(() {
       _notifyPainter();
     });
@@ -24,7 +26,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     _points = <Point>[];
 
     // Start animation
-    _animationController.reverse();
+    _animationController.repeat();
   }
 
   @override
