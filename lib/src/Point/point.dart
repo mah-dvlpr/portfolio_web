@@ -3,6 +3,7 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
+/// TODO: Fix this class!
 class Point {
   final pointBrush = Paint()..color = Colors.lightBlue[50];
 
@@ -12,12 +13,14 @@ class Point {
   /// Speed (+/-) in terms of x/y coordinates of current position on canvas.
   Offset speed;
 
-  double size;
+  /// A Point grows from it's point of creation, [sizeInit], and grows to [sizeTarget].
+  double sizeInit;
+  double sizeTarget;
 
-  Point(this.position, this.speed, this.size);
+  Point._(this.position, this.speed, this.sizeInit, this.sizeTarget);
 
   static Point getRandomPoint(PhysicsDelegate physics, BuildContext context) {
-    return Point(
+    return Point._(
         Offset(physics.random.nextDouble() * MediaQuery.of(context).size.width,
             physics.random.nextDouble() * MediaQuery.of(context).size.height),
         Offset(0, 0),
@@ -31,6 +34,7 @@ class Point {
   }
 }
 
+/// TODO: Fix this class!
 /// Utility class for handling physics of supplied points.
 class PhysicsDelegate {
   static DateTime dateTime;
