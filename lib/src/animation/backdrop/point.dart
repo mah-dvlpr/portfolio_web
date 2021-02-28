@@ -42,7 +42,7 @@ class Point {
 
   void draw(Canvas canvas, Size canvasSize) {
     if (radiusTargetIndex < radiusTargetElements - 1 &&
-        DateTime.now().difference(dateTime).inMilliseconds > 32) {
+        DateTime.now().difference(dateTime).inMilliseconds > 64) {
       ++radiusTargetIndex;
       dateTime = DateTime.now();
     }
@@ -54,14 +54,14 @@ class Point {
 /// Utility class for handling physics of supplied points.
 class PointEngineDelegate {
   static DateTime dateTime;
-  static const maxForce = 2.0;
+  static const maxForce = .5;
   static const maxRadius = 5.0; // TODO: Might be better to just have this as max mass?
 
   PointEngineDelegate();
 
   static updatePoints(List<Point> points, BuildContext context) {
     // Note: < 16 ~= 60 fps, < 32 ~= 30 fps
-    if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < 16) {
+    if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < 32) {
       return;
     }
     dateTime = DateTime.now();
