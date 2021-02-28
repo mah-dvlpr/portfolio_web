@@ -39,7 +39,6 @@ class Point {
   }
 }
 
-/// TODO: Fix this class!
 /// Utility class for handling physics of supplied points.
 class PointEngineDelegate {
   static DateTime dateTime;
@@ -49,13 +48,8 @@ class PointEngineDelegate {
 
   PointEngineDelegate();
 
-  // Duplicating fields, but this is so that this delegate can be passed as an argument
-  double get speedMax => PointEngineDelegate._speedMax;
-  double get sizeMax => PointEngineDelegate._sizeMax;
-  Random get random => PointEngineDelegate._random;
-
   static updatePoints(List<Point> points, BuildContext context) {
-    // Note: < 16 ~= 60 fps
+    // Note: < 16 ~= 60 fps, < 32 ~= 30 fps
     if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < 16) {
       return;
     }
