@@ -30,7 +30,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     return StreamBuilder<List<Point>>(
       stream: _streamController.stream,
       builder: (_, snapshot) => CustomPaint(
-        painter: BackdropAnimationPainter(snapshot),
+        painter: BackdropAnimationPainter(snapshot.data),
         willChange: true,
       ),
     );
