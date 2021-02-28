@@ -55,7 +55,7 @@ class Point {
 class PointEngineDelegate {
   static DateTime dateTime;
   static const maxForce = 2.0;
-  static const maxRadius = 100.0; // TODO: Might be better to just have this as max mass?
+  static const maxRadius = 10.0; // TODO: Might be better to just have this as max mass?
 
   PointEngineDelegate();
 
@@ -73,11 +73,11 @@ class PointEngineDelegate {
     // For current object, update and apply force for every other object
     for (int current = 0; current < points.length - 1; ++current) {
       for (int other = current + 1; other < points.length; ++other) {
-        // if (_pointAreNotTouching(points[current], points[other])) {
+        if (_pointsAreNotTouching(points[current], points[other])) {
           _addMutualForce(points[current], points[other]);
-        // } else {
-        //   _combinePointsAndCreateNew(points[current], points[other], context);
-        // }
+        } else {
+          points[other] = _combinePointsAndCreateNew(points[current], points[other], context);
+        }
       }
     }
   }
@@ -94,18 +94,18 @@ class PointEngineDelegate {
     }
   }
 
-  static bool _pointAreNotTouching(Point a, Point b) {
-    return (_hypotenuseSquared(a, b) < pow(a.radiusTarget[a.radiusTargetIndex] + b.radiusTarget[b.radiusTargetIndex], 2));
+  static bool _pointsAreNotTouching(Point a, Point b) {
+    return (_hypotenuseSquared(a, b) >= pow(a.radiusTarget[a.radiusTargetIndex] + b.radiusTarget[b.radiusTargetIndex], 2));
   }
 
-  static void _combinePointsAndCreateNew(Point a, Point b, BuildContext context) {
-    a.radiusTarget[a.radiusTargetIndex] = max(a.radiusTarget.last, b.radiusTarget.last);
-    a.mass = max(a.mass, b.mass);
-    b = Point.getRandomPoint(context, maxForce, maxRadius);
+  static Point _combinePointsAndCreateNew(Point a, Point b, BuildContext context) {
+    // a.radiusTarget[a.radiusTargetIndex] = max(a.radiusTarget.last, b.radiusTarget.last);
+    // a.mass = max(a.mass, b.mass);
+    return Point.getRandomPoint(context, maxForce, maxRadius);
   }
 
   static void _addMutualForce(Point a, Point b) {
-    // Determine magnitude of attraction
+    // Determine magnitude of attraction (some pseudo science here)
     var attraction = a.mass * b.mass / _hypotenuseSquared(a, b);
 
     // Determine direction (based on the perspective of point 'a')

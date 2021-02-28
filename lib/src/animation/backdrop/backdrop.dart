@@ -14,7 +14,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   AnimationController _animationController;
   StreamController<List<Point>> _streamController;
 
-  static const int _pointsMax = 10;
+  static const int _pointsMax = 50;
   List<Point> _points;
 
   @override
