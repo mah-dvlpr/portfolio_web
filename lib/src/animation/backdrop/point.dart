@@ -19,12 +19,16 @@ class Point {
   List<double> sizeTarget;
   int sizeTargetIndex = 0;
 
+  // Currently purely based on size
+  double mass;
+
   Point._(this.position, this.force, double sizeTarget) {
+    dateTime = DateTime.now();
     this.sizeTarget = <double>[];
     for (double i = 0.0; i <= sizeTarget; i += sizeTarget / sizeTargetElements) {
       this.sizeTarget.add(i);
     }
-    dateTime = DateTime.now();
+    mass = this.sizeTarget.first;
   }
 
   static Point getRandomPoint(BuildContext context, double maxForce, double maxSize) {
@@ -44,6 +48,7 @@ class Point {
       dateTime = DateTime.now();
     }
     canvas.drawCircle(position, sizeTarget[sizeTargetIndex], pointBrush);
+    mass = this.sizeTarget[sizeTargetIndex];
   }
 }
 
@@ -51,7 +56,7 @@ class Point {
 class PointEngineDelegate {
   static DateTime dateTime;
   static const maxForce = 2.0;
-  static const maxSize = 10.0;
+  static const maxSize = 10.0; // TODO: Might be better to just have this as max mass?
 
   PointEngineDelegate();
 
@@ -66,28 +71,12 @@ class PointEngineDelegate {
   }
 
   static _updatePointSpeedPerAdjacentPoints(List<Point> points) {
-    // for (int currentPointIndex = 0; currentPointIndex < points.length - 1; ++currentPointIndex) {
-    //   var currentPoint = points[currentPointIndex];
-    //   double currentPointMass = currentPoint.sizeTarget.last; // TODO: Doing this for now, might change later
-      
-    //   for (int otherPointIndex = currentPointIndex + 1; otherPointIndex < points.length; ++otherPointIndex) {
-    //     var otherPoint = points[otherPointIndex];
-    //     double otherPointMass = otherPoint.sizeTarget.last; // TODO: Doing this for now, might change later
-
-    //     var attraction = currentPointMass * otherPointMass / _hypotenuseSquared(currentPoint, otherPoint);
-    //     var attractionX = (currentPoint.position.dx < otherPoint.position.dx) ? attraction : -attraction;
-    //     var attractionY = (currentPoint.position.dy < otherPoint.position.dy) ? attraction : -attraction;
-    //     currentPoint.force += Offset(attractionX, attractionY);
-    //   }
-
-    //   // Make sure we don't reach lightspeed!
-    //   if (currentPoint.force.dx.abs() > maxForce) {
-    //     currentPoint.force = Offset(maxForce, currentPoint.force.dy);
-    //   }
-    //   if (currentPoint.force.dy.abs() > maxForce) {
-    //     currentPoint.force = Offset(currentPoint.force.dx, maxForce);
-    //   }
-    // }
+    // For current object, update and apply force for every other object
+    for (int current = 0; current < points.length - 1; ++current) {
+      for (int other = current + 1; other < points.length; ++other) {
+        _addMutualForce(points[current], points[other]);
+      }
+    }
   }
 
   static _updatePointPosition(List<Point> points, context) {
@@ -102,9 +91,31 @@ class PointEngineDelegate {
     }
   }
 
+  static Offset _addMutualForce(Point a, Point b) {
+    // Determine magnitude of attraction
+    var attraction = a.mass * b.mass / _hypotenuseSquared(a, b);
+
+    // Determine direction (based on the perspective of point 'a')
+    var attractionX = (a.position.dx < b.position.dx) ? attraction : -attraction;
+    var attractionY = (a.position.dy < b.position.dy) ? attraction : -attraction;
+    
+    // Apply attraction to each point
+    var additiveForce = Offset(attractionX, attractionY);
+    if (_isBelowForceLimit(a)) { // Max force limit
+      a.force += additiveForce;
+    }
+    if (_isBelowForceLimit(b)) { // Max force limit
+      b.force += -additiveForce; // Equal, but opposite direction
+    }
+  }
+
   static double _hypotenuseSquared(Point a, Point b) {
     var dx = pow((a.position.dx - b.position.dx).abs(), 2);
     var dy = pow((a.position.dy - b.position.dy).abs(), 2);
     return dx + dy;
+  }
+
+  static bool _isBelowForceLimit(Point a) {
+    return sqrt(pow(a.force.dx.abs(), 2) + pow(a.force.dy.abs(), 2)) < maxForce;
   }
 }
