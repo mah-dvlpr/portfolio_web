@@ -16,11 +16,15 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController.unbounded(
-        vsync: this, duration: Duration(seconds: 1));
-    _animationController.addListener(() {
-      _notifyPainter();
+    _animationController = AnimationController(vsync: this, duration: Duration(seconds: 1));
+    _animationController.addStatusListener((status) {
+      if (status == AnimationStatus.completed) {
+        _notifyPainter();
+        _animationController.reset();
+        _animationController.forward();
+      }
     });
+    _animationController.forward();
     _streamController = StreamController<List<Point>>();
     _points = <Point>[];
   }
@@ -44,6 +48,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 
   _notifyPainter() {
+    _points.add(Point());
     _streamController.add(_points);
   }
 }
@@ -60,8 +65,8 @@ class BackdropPainter extends CustomPainter {
   }
 
   @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) {
-    return false;
+  bool shouldRepaint(BackdropPainter oldDelegate) {
+    return true;
   }
 }
 
