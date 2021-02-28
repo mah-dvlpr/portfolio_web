@@ -18,6 +18,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     super.initState();
     _animationController = AnimationController(vsync: this, duration: Duration(seconds: 1));
     _animationController.addStatusListener((status) {
+      // Below works if you want a static time every second, but not the best
       if (status == AnimationStatus.completed) {
         _notifyPainter();
         _animationController.reset();
