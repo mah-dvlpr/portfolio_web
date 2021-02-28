@@ -1,5 +1,6 @@
 import 'dart:async';
 import 'dart:ui';
+import 'dart:math';
 
 import 'package:flutter/material.dart';
 import 'point.dart';
@@ -69,8 +70,10 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 }
 
+/// TODO: Should probably have some kind of theme class...
 class _BackdropPainter extends CustomPainter {
   static final backgroundBrush = Paint()..color = Colors.cyan[900];
+  static final lineStroke = Paint()..color = Colors.lightBlue[50]; // Bad coupling here, but same as in point
   List<Point> _points;
 
   _BackdropPainter(this._points);
@@ -79,13 +82,25 @@ class _BackdropPainter extends CustomPainter {
   void paint(Canvas canvas, Size size) {
     canvas.drawRect(Rect.largest, backgroundBrush);
 
-    for (var point in _points) {
-      point.draw(canvas, size);
+    for (int current = 0; current < _points.length - 1; ++current) {
+      // Draw point itself
+      _points[current].draw(canvas, size);
+      for (int other = current + 1; other < _points.length; ++other) {
+        // Draw lines between points deemed close enough
+        if (_isCloseEnough(_points[current], _points[other])) {
+          canvas.drawLine(_points[current].position, _points[other].position, lineStroke);
+        }
+      }
     }
   }
 
   @override
   bool shouldRepaint(_BackdropPainter oldDelegate) {
     return true;
+  }
+
+  bool _isCloseEnough(Point a, Point b) {
+    // 70 is just an arbitrary number. 70 times the radius of both points combined.
+    return PointEngineDelegate.hypotenuseSquared(a, b) < 70 * pow((a.radiusTarget[a.radiusTargetIndex] + b.radiusTarget[b.radiusTargetIndex]), 2);
   }
 }

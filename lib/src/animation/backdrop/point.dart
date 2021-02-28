@@ -95,7 +95,7 @@ class PointEngineDelegate {
   }
 
   static bool _pointsAreNotTouching(Point a, Point b) {
-    return (_hypotenuseSquared(a, b) >= pow(a.radiusTarget[a.radiusTargetIndex] + b.radiusTarget[b.radiusTargetIndex], 2));
+    return (hypotenuseSquared(a, b) >= pow(a.radiusTarget[a.radiusTargetIndex] + b.radiusTarget[b.radiusTargetIndex], 2));
   }
 
   static Point _combinePointsAndCreateNew(Point a, Point b, BuildContext context) {
@@ -106,7 +106,7 @@ class PointEngineDelegate {
 
   static void _addMutualForce(Point a, Point b) {
     // Determine magnitude of attraction (some pseudo science here)
-    var attraction = a.mass * b.mass / _hypotenuseSquared(a, b);
+    var attraction = a.mass * b.mass / hypotenuseSquared(a, b);
 
     // Determine direction (based on the perspective of point 'a')
     var attractionX = (a.position.dx < b.position.dx) ? attraction : -attraction;
@@ -122,13 +122,13 @@ class PointEngineDelegate {
     }
   }
 
-  static double _hypotenuseSquared(Point a, Point b) {
+  static bool _isBelowForceLimit(Point a) {
+    return sqrt(pow(a.force.dx.abs(), 2) + pow(a.force.dy.abs(), 2)) < maxForce;
+  }
+
+  static double hypotenuseSquared(Point a, Point b) {
     var dx = pow((a.position.dx - b.position.dx).abs(), 2);
     var dy = pow((a.position.dy - b.position.dy).abs(), 2);
     return dx + dy;
-  }
-
-  static bool _isBelowForceLimit(Point a) {
-    return sqrt(pow(a.force.dx.abs(), 2) + pow(a.force.dy.abs(), 2)) < maxForce;
   }
 }
