@@ -55,7 +55,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 
   void _notifyPainter() {
-    // _PhysicsDelegate.updatePoints(_points);
+    _PhysicsDelegate.updatePoints(_points);
     _streamController.add(_points);
   }
 
