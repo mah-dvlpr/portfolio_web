@@ -57,14 +57,14 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
   void _notifyListeners() {
     _generateRandomPoints(_points);
-    PhysicsDelegate.updatePoints(_points, context);
+    PointEngineDelegate.updatePoints(_points, context);
     _streamController.add(_points);
   }
 
   /// Will only generate points if list is not filled with [_pointsMax].
   void _generateRandomPoints(List<Point> points) {
     for (int i = points.length; i < _pointsMax; ++i) {
-      _points.add(Point.getRandomPoint(PhysicsDelegate(), context));
+      _points.add(Point.getRandomPoint(PointEngineDelegate(), context));
     }
   }
 }

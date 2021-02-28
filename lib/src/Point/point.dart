@@ -3,51 +3,56 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
-/// TODO: Fix this class!
 class Point {
   final pointBrush = Paint()..color = Colors.lightBlue[50];
+  static final random = Random();
 
   /// Current position on canvas.
   Offset position;
 
-  /// Speed (+/-) in terms of x/y coordinates of current position on canvas.
-  Offset speed;
+  /// Force (+/-) in terms of x/y coordinates of current position on canvas.
+  Offset force;
 
-  /// A Point grows from it's point of creation, [sizeInit], and grows to [sizeTarget].
-  double sizeInit;
-  double sizeTarget;
+  /// A Point grows from [sizeTarget.first] to [sizeTarget.last].
+  static const sizeTargetElements = 10;
+  List<double> sizeTarget;
 
-  Point._(this.position, this.speed, this.sizeInit, this.sizeTarget);
+  Point._(this.position, this.force, double sizeTarget) {
+    this.sizeTarget = <double>[];
+    for (double i = 0; i >= sizeTarget; i += sizeTarget / sizeTargetElements) {
+      this.sizeTarget.add(i);
+    }
+  }
 
-  static Point getRandomPoint(PhysicsDelegate physics, BuildContext context) {
-    return Point._(
-        Offset(physics.random.nextDouble() * MediaQuery.of(context).size.width,
-            physics.random.nextDouble() * MediaQuery.of(context).size.height),
-        Offset(0, 0),
-        // Offset((physics.random.nextDouble() * physics.speedMax) - physics.speedMax / 2, 
-        //     (physics.random.nextDouble() * physics.speedMax) - physics.speedMax / 2),
-        physics.random.nextDouble() * physics.sizeMax + 1);
+  static Point getRandomPoint(BuildContext context, double maxForce, double maxSize) {
+    var position = Offset(random.nextDouble() * MediaQuery.of(context).size.width,
+                          random.nextDouble() * MediaQuery.of(context).size.height);
+    var initialForce = Offset((random.nextDouble() * maxForce) - maxForce / 2, 
+                              (random.nextDouble() * maxForce) - maxForce / 2);
+    var sizeTarget = random.nextDouble() * maxSize;
+
+    return Point._(position, initialForce, sizeTarget);
   }
 
   void draw(Canvas canvas, Size canvasSize) {
-    canvas.drawCircle(position, size, pointBrush);
+    canvas.drawCircle(position, , pointBrush);
   }
 }
 
 /// TODO: Fix this class!
 /// Utility class for handling physics of supplied points.
-class PhysicsDelegate {
+class PointEngineDelegate {
   static DateTime dateTime;
   static const _speedMax = 2.0;
   static const _sizeMax = 2.0;
   static final _random = Random();
 
-  PhysicsDelegate();
+  PointEngineDelegate();
 
   // Duplicating fields, but this is so that this delegate can be passed as an argument
-  double get speedMax => PhysicsDelegate._speedMax;
-  double get sizeMax => PhysicsDelegate._sizeMax;
-  Random get random => PhysicsDelegate._random;
+  double get speedMax => PointEngineDelegate._speedMax;
+  double get sizeMax => PointEngineDelegate._sizeMax;
+  Random get random => PointEngineDelegate._random;
 
   static updatePoints(List<Point> points, BuildContext context) {
     // Note: < 16 ~= 60 fps
@@ -71,27 +76,27 @@ class PhysicsDelegate {
         var attraction = currentPointMass * otherPointMass / _hypotenuseSquared(currentPoint, otherPoint);
         var attractionX = (currentPoint.position.dx < otherPoint.position.dx) ? attraction : -attraction;
         var attractionY = (currentPoint.position.dy < otherPoint.position.dy) ? attraction : -attraction;
-        currentPoint.speed += Offset(attractionX, attractionY);
+        currentPoint.force += Offset(attractionX, attractionY);
       }
 
       // Make sure we don't reach lightspeed!
-      if (currentPoint.speed.dx.abs() > _speedMax) {
-        currentPoint.speed = Offset(_speedMax, currentPoint.speed.dy);
+      if (currentPoint.force.dx.abs() > _speedMax) {
+        currentPoint.force = Offset(_speedMax, currentPoint.force.dy);
       }
-      if (currentPoint.speed.dy.abs() > _speedMax) {
-        currentPoint.speed = Offset(currentPoint.speed.dx, _speedMax);
+      if (currentPoint.force.dy.abs() > _speedMax) {
+        currentPoint.force = Offset(currentPoint.force.dx, _speedMax);
       }
     }
   }
 
   static _updatePointPosition(List<Point> points, context) {
     for (int i = 0; i < points.length; ++i) {
-      points[i].position += points[i].speed;
+      points[i].position += points[i].force;
       if (points[i].position.dx < 0 ||
           points[i].position.dx > MediaQuery.of(context).size.width ||
           points[i].position.dy < 0 ||
           points[i].position.dy > MediaQuery.of(context).size.height) {
-        points[i] = Point.getRandomPoint(PhysicsDelegate(), context);
+        points[i] = Point.getRandomPoint(PointEngineDelegate(), context);
       }
     }
   }
