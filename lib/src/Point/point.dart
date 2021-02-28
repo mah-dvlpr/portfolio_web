@@ -4,6 +4,7 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 
 class Point {
+  DateTime dateTime;
   final pointBrush = Paint()..color = Colors.lightBlue[50];
   static final random = Random();
 
@@ -14,14 +15,16 @@ class Point {
   Offset force;
 
   /// A Point grows from [sizeTarget.first] to [sizeTarget.last].
-  static const sizeTargetElements = 10;
+  static const sizeTargetElements = 32;
   List<double> sizeTarget;
+  int sizeTargetIndex = 0;
 
   Point._(this.position, this.force, double sizeTarget) {
     this.sizeTarget = <double>[];
-    for (double i = 0; i >= sizeTarget; i += sizeTarget / sizeTargetElements) {
+    for (double i = 0.0; i <= sizeTarget; i += sizeTarget / sizeTargetElements) {
       this.sizeTarget.add(i);
     }
+    dateTime = DateTime.now();
   }
 
   static Point getRandomPoint(BuildContext context, double maxForce, double maxSize) {
@@ -35,16 +38,20 @@ class Point {
   }
 
   void draw(Canvas canvas, Size canvasSize) {
-    canvas.drawCircle(position, , pointBrush);
+    if (sizeTargetIndex < sizeTargetElements - 1 &&
+        DateTime.now().difference(dateTime).inMilliseconds > 32) {
+      ++sizeTargetIndex;
+      dateTime = DateTime.now();
+    }
+    canvas.drawCircle(position, sizeTarget[sizeTargetIndex], pointBrush);
   }
 }
 
 /// Utility class for handling physics of supplied points.
 class PointEngineDelegate {
   static DateTime dateTime;
-  static const _speedMax = 2.0;
-  static const _sizeMax = 2.0;
-  static final _random = Random();
+  static const maxForce = 2.0;
+  static const maxSize = 10.0;
 
   PointEngineDelegate();
 
@@ -59,28 +66,28 @@ class PointEngineDelegate {
   }
 
   static _updatePointSpeedPerAdjacentPoints(List<Point> points) {
-    for (int currentPointIndex = 0; currentPointIndex < points.length - 1; ++currentPointIndex) {
-      var currentPoint = points[currentPointIndex];
-      double currentPointMass = currentPoint.size; // TODO: Doing this for now, might change later
+    // for (int currentPointIndex = 0; currentPointIndex < points.length - 1; ++currentPointIndex) {
+    //   var currentPoint = points[currentPointIndex];
+    //   double currentPointMass = currentPoint.sizeTarget.last; // TODO: Doing this for now, might change later
       
-      for (int otherPointIndex = currentPointIndex + 1; otherPointIndex < points.length; ++otherPointIndex) {
-        var otherPoint = points[otherPointIndex];
-        double otherPointMass = otherPoint.size; // TODO: Doing this for now, might change later
+    //   for (int otherPointIndex = currentPointIndex + 1; otherPointIndex < points.length; ++otherPointIndex) {
+    //     var otherPoint = points[otherPointIndex];
+    //     double otherPointMass = otherPoint.sizeTarget.last; // TODO: Doing this for now, might change later
 
-        var attraction = currentPointMass * otherPointMass / _hypotenuseSquared(currentPoint, otherPoint);
-        var attractionX = (currentPoint.position.dx < otherPoint.position.dx) ? attraction : -attraction;
-        var attractionY = (currentPoint.position.dy < otherPoint.position.dy) ? attraction : -attraction;
-        currentPoint.force += Offset(attractionX, attractionY);
-      }
+    //     var attraction = currentPointMass * otherPointMass / _hypotenuseSquared(currentPoint, otherPoint);
+    //     var attractionX = (currentPoint.position.dx < otherPoint.position.dx) ? attraction : -attraction;
+    //     var attractionY = (currentPoint.position.dy < otherPoint.position.dy) ? attraction : -attraction;
+    //     currentPoint.force += Offset(attractionX, attractionY);
+    //   }
 
-      // Make sure we don't reach lightspeed!
-      if (currentPoint.force.dx.abs() > _speedMax) {
-        currentPoint.force = Offset(_speedMax, currentPoint.force.dy);
-      }
-      if (currentPoint.force.dy.abs() > _speedMax) {
-        currentPoint.force = Offset(currentPoint.force.dx, _speedMax);
-      }
-    }
+    //   // Make sure we don't reach lightspeed!
+    //   if (currentPoint.force.dx.abs() > maxForce) {
+    //     currentPoint.force = Offset(maxForce, currentPoint.force.dy);
+    //   }
+    //   if (currentPoint.force.dy.abs() > maxForce) {
+    //     currentPoint.force = Offset(currentPoint.force.dx, maxForce);
+    //   }
+    // }
   }
 
   static _updatePointPosition(List<Point> points, context) {
@@ -90,7 +97,7 @@ class PointEngineDelegate {
           points[i].position.dx > MediaQuery.of(context).size.width ||
           points[i].position.dy < 0 ||
           points[i].position.dy > MediaQuery.of(context).size.height) {
-        points[i] = Point.getRandomPoint(PointEngineDelegate(), context);
+        points[i] = Point.getRandomPoint(context, maxForce, maxSize);
       }
     }
   }
