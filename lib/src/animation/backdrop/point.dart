@@ -14,41 +14,40 @@ class Point {
   /// Force (+/-) in terms of x/y coordinates of current position on canvas.
   Offset force;
 
-  /// A Point grows from [sizeTarget.first] to [sizeTarget.last].
-  static const sizeTargetElements = 32;
-  List<double> sizeTarget;
-  int sizeTargetIndex = 0;
+  /// A Point grows from [radiusTarget.first] to [radiusTarget.last].
+  static const radiusTargetElements = 32;
+  List<double> radiusTarget;
+  int radiusTargetIndex = 0;
 
-  // Currently purely based on size
+  // Currently purely based on radius
   double mass;
 
-  Point._(this.position, this.force, double sizeTarget) {
+  Point._(this.position, this.force, double radiusTarget) {
     dateTime = DateTime.now();
-    this.sizeTarget = <double>[];
-    for (double i = 0.0; i <= sizeTarget; i += sizeTarget / sizeTargetElements) {
-      this.sizeTarget.add(i);
+    this.radiusTarget = <double>[];
+    for (double i = 0.0; i <= radiusTarget; i += radiusTarget / radiusTargetElements) {
+      this.radiusTarget.add(i);
     }
-    mass = this.sizeTarget.first;
+    mass = this.radiusTarget.first;
   }
 
-  static Point getRandomPoint(BuildContext context, double maxForce, double maxSize) {
+  static Point getRandomPoint(BuildContext context, double maxForce, double maxRadius) {
     var position = Offset(random.nextDouble() * MediaQuery.of(context).size.width,
                           random.nextDouble() * MediaQuery.of(context).size.height);
-    var initialForce = Offset((random.nextDouble() * maxForce) - maxForce / 2, 
-                              (random.nextDouble() * maxForce) - maxForce / 2);
-    var sizeTarget = random.nextDouble() * maxSize;
+    var initialForce = Offset(0,0);
+    var radiusTarget = random.nextDouble() * maxRadius;
 
-    return Point._(position, initialForce, sizeTarget);
+    return Point._(position, initialForce, radiusTarget);
   }
 
   void draw(Canvas canvas, Size canvasSize) {
-    if (sizeTargetIndex < sizeTargetElements - 1 &&
+    if (radiusTargetIndex < radiusTargetElements - 1 &&
         DateTime.now().difference(dateTime).inMilliseconds > 32) {
-      ++sizeTargetIndex;
+      ++radiusTargetIndex;
       dateTime = DateTime.now();
     }
-    canvas.drawCircle(position, sizeTarget[sizeTargetIndex], pointBrush);
-    mass = this.sizeTarget[sizeTargetIndex];
+    canvas.drawCircle(position, radiusTarget[radiusTargetIndex], pointBrush);
+    mass = this.radiusTarget[radiusTargetIndex];
   }
 }
 
@@ -56,7 +55,7 @@ class Point {
 class PointEngineDelegate {
   static DateTime dateTime;
   static const maxForce = 2.0;
-  static const maxSize = 10.0; // TODO: Might be better to just have this as max mass?
+  static const maxRadius = 100.0; // TODO: Might be better to just have this as max mass?
 
   PointEngineDelegate();
 
@@ -66,15 +65,19 @@ class PointEngineDelegate {
       return;
     }
     dateTime = DateTime.now();
-    _updatePointSpeedPerAdjacentPoints(points);
+    _updatePointSpeedPerAdjacentPoints(points, context);
     _updatePointPosition(points, context);
   }
 
-  static _updatePointSpeedPerAdjacentPoints(List<Point> points) {
+  static _updatePointSpeedPerAdjacentPoints(List<Point> points, BuildContext context) {
     // For current object, update and apply force for every other object
     for (int current = 0; current < points.length - 1; ++current) {
       for (int other = current + 1; other < points.length; ++other) {
-        _addMutualForce(points[current], points[other]);
+        // if (_pointAreNotTouching(points[current], points[other])) {
+          _addMutualForce(points[current], points[other]);
+        // } else {
+        //   _combinePointsAndCreateNew(points[current], points[other], context);
+        // }
       }
     }
   }
@@ -86,12 +89,22 @@ class PointEngineDelegate {
           points[i].position.dx > MediaQuery.of(context).size.width ||
           points[i].position.dy < 0 ||
           points[i].position.dy > MediaQuery.of(context).size.height) {
-        points[i] = Point.getRandomPoint(context, maxForce, maxSize);
+        points[i] = Point.getRandomPoint(context, maxForce, maxRadius);
       }
     }
   }
 
-  static Offset _addMutualForce(Point a, Point b) {
+  static bool _pointAreNotTouching(Point a, Point b) {
+    return (_hypotenuseSquared(a, b) < pow(a.radiusTarget[a.radiusTargetIndex] + b.radiusTarget[b.radiusTargetIndex], 2));
+  }
+
+  static void _combinePointsAndCreateNew(Point a, Point b, BuildContext context) {
+    a.radiusTarget[a.radiusTargetIndex] = max(a.radiusTarget.last, b.radiusTarget.last);
+    a.mass = max(a.mass, b.mass);
+    b = Point.getRandomPoint(context, maxForce, maxRadius);
+  }
+
+  static void _addMutualForce(Point a, Point b) {
     // Determine magnitude of attraction
     var attraction = a.mass * b.mass / _hypotenuseSquared(a, b);
 

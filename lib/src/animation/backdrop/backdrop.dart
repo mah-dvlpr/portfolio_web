@@ -14,7 +14,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   AnimationController _animationController;
   StreamController<List<Point>> _streamController;
 
-  static const int _pointsMax = 50;
+  static const int _pointsMax = 10;
   List<Point> _points;
 
   @override
@@ -64,7 +64,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   /// Will only generate points if list is not filled with [_pointsMax].
   void _generateRandomPoints(List<Point> points) {
     for (int i = points.length; i < _pointsMax; ++i) {
-      _points.add(Point.getRandomPoint(context, PointEngineDelegate.maxForce, PointEngineDelegate.maxSize));
+      _points.add(Point.getRandomPoint(context, PointEngineDelegate.maxForce, PointEngineDelegate.maxRadius));
     }
   }
 }
