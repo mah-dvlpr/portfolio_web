@@ -19,7 +19,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     _animationController = AnimationController.unbounded(
         vsync: this, duration: Duration(seconds: 1));
     _animationController.addListener(() {
-      setState() {}
+      _notifyPainter();
     });
     _streamController = StreamController<List<Point>>();
     _points = <Point>[];
@@ -38,10 +38,13 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
   @override
   void dispose() {
-    // TODO: implement dispose
     _animationController.dispose();
     _streamController.close();
     super.dispose();
+  }
+
+  _notifyPainter() {
+    _streamController.add(_points);
   }
 }
 
