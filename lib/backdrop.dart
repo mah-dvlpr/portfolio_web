@@ -30,7 +30,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     return StreamBuilder<List<Point>>(
       stream: _streamController.stream,
       builder: (_, snapshot) => CustomPaint(
-        painter: BackdropAnimationPainter(snapshot.data),
+        painter: BackdropPainter(snapshot.data),
         willChange: true,
       ),
     );
@@ -45,10 +45,10 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 }
 
-class BackdropAnimationPainter extends CustomPainter {
+class BackdropPainter extends CustomPainter {
   List<Point> _points;
 
-  BackdropAnimationPainter(this._points);
+  BackdropPainter(this._points);
 
   @override
   void paint(Canvas canvas, Size size) {
