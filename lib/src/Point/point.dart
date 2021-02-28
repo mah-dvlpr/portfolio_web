@@ -25,6 +25,10 @@ class Point {
         //     (physics.random.nextDouble() * physics.speedMax) - physics.speedMax / 2),
         physics.random.nextDouble() * physics.sizeMax + 1);
   }
+
+  void draw(Canvas canvas, Size canvasSize) {
+    canvas.drawCircle(position, size, pointBrush);
+  }
 }
 
 /// Utility class for handling physics of supplied points.
