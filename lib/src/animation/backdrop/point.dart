@@ -55,7 +55,7 @@ class Point {
 class PointEngineDelegate {
   static DateTime dateTime;
   static const maxForce = 2.0;
-  static const maxRadius = 10.0; // TODO: Might be better to just have this as max mass?
+  static const maxRadius = 5.0; // TODO: Might be better to just have this as max mass?
 
   PointEngineDelegate();
 
