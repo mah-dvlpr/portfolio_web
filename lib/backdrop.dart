@@ -24,10 +24,11 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     // odd as of now (1.27.0-4.0.pre). Doing this instead. V
     _animationController =
         AnimationController(vsync: this, duration: Duration(seconds: 100));
-    _animationController.addListener(() => _notifyListeners());
+    _animationController.addListener(() {
+      _notifyListeners();
+    });
     _streamController = StreamController<List<_Point>>();
     _points = <_Point>[];
-    _generateRandomPoints(_points);
 
     // Start animation (+physics)
     _animationController.repeat();
@@ -40,6 +41,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
       builder: (_, snapshot) => CustomPaint(
         painter: _BackdropPainter(snapshot.data),
         willChange: true,
+        isComplex: true,
       ),
     );
   }
@@ -52,14 +54,15 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 
   void _notifyListeners() {
-    _PhysicsDelegate.updatePoints(_points);
+    _generateRandomPoints(_points);
+    _PhysicsDelegate.updatePoints(_points, context);
     _streamController.add(_points);
   }
 
   /// Has to be called AFTER the first paint.
   void _generateRandomPoints(List<_Point> points) {
-    for (int i = 0; i < pointsMax; ++i) {
-      _points.add(_Point.getRandomPoint(_PhysicsDelegate()));
+    for (int i = points.length; i < pointsMax; ++i) {
+      _points.add(_Point.getRandomPoint(_PhysicsDelegate(), context));
     }
   }
 }
@@ -97,10 +100,10 @@ class _Point {
 
   _Point(this.position, this.speed, this.size);
 
-  static _Point getRandomPoint(_PhysicsDelegate physics) {
+  static _Point getRandomPoint(_PhysicsDelegate physics, BuildContext context) {
     return _Point(
-        Offset(physics.random.nextDouble() * window.physicalSize.width,
-            physics.random.nextDouble() * window.physicalSize.height),
+        Offset(physics.random.nextDouble() * MediaQuery.of(context).size.width,
+            physics.random.nextDouble() * MediaQuery.of(context).size.height),
         Offset(0, 0),
         // Offset((physics.random.nextDouble() * physics.speedMax) - physics.speedMax / 2, 
         //     (physics.random.nextDouble() * physics.speedMax) - physics.speedMax / 2),
@@ -122,14 +125,14 @@ class _PhysicsDelegate {
   double get sizeMax => _PhysicsDelegate._sizeMax;
   Random get random => _PhysicsDelegate._random;
 
-  static updatePoints(List<_Point> points) {
+  static updatePoints(List<_Point> points, BuildContext context) {
     // Note: < 16 ~= 60 fps
     if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < 16) {
       return;
     }
     dateTime = DateTime.now();
     _updatePointSpeedPerAdjacentPoints(points);
-    _updatePointPosition(points);
+    _updatePointPosition(points, context);
   }
 
   static _updatePointSpeedPerAdjacentPoints(List<_Point> points) {
@@ -157,14 +160,14 @@ class _PhysicsDelegate {
     }
   }
 
-  static _updatePointPosition(List<_Point> points) {
+  static _updatePointPosition(List<_Point> points, context) {
     for (int i = 0; i < points.length; ++i) {
       points[i].position += points[i].speed;
-      if (points[i].position.dx < 0                           ||
-          points[i].position.dx > window.physicalSize.width   ||
-          points[i].position.dy < 0                           ||
-          points[i].position.dy > window.physicalSize.height) {
-        points[i] = _Point.getRandomPoint(_PhysicsDelegate());
+      if (points[i].position.dx < 0 ||
+          points[i].position.dx > MediaQuery.of(context).size.width ||
+          points[i].position.dy < 0 ||
+          points[i].position.dy > MediaQuery.of(context).size.height) {
+        points[i] = _Point.getRandomPoint(_PhysicsDelegate(), context);
       }
     }
   }
