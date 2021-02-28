@@ -16,18 +16,15 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   @override
   void initState() {
     super.initState();
-    _animationController = AnimationController(vsync: this, duration: Duration(seconds: 1));
-    _animationController.addStatusListener((status) {
-      // Below works if you want a static time every second, but not the best
-      if (status == AnimationStatus.completed) {
-        _notifyPainter();
-        _animationController.reset();
-        _animationController.forward();
-      }
+    _animationController = AnimationController.unbounded(vsync: this, duration: Duration(seconds: 1));
+    _animationController.addListener(() {
+      _notifyPainter();
     });
-    _animationController.forward();
     _streamController = StreamController<List<Point>>();
     _points = <Point>[];
+
+    // Start animation
+    _animationController.reverse();
   }
 
   @override
