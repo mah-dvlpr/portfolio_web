@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 
-import 'package:portfolio_web/main.dart';
+import 'src/animation/backdrop/backdrop.dart';
 
 export 'src/animation/backdrop/backdrop.dart';
 
