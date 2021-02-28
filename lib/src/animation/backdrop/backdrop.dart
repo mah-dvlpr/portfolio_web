@@ -2,7 +2,7 @@ import 'dart:async';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
-import '../Point/point.dart';
+import 'point.dart';
 
 class BackdropAnimation extends StatefulWidget {
   @override
