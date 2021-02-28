@@ -8,6 +8,10 @@ void main() {
 class BackDropDemo extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
-    return BackdropAnimation();
+    return MaterialApp(
+      debugShowCheckedModeBanner: false,
+      // showPerformanceOverlay: true,
+      home: BackdropAnimation(),
+    );
   }
 }
