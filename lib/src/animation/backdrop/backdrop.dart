@@ -20,6 +20,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   /// The density (number of points) per window area.
   /// Per 200 * 200 I want 1 point(s).
   static const double _pointDensity = 1 / (200 * 200);
+  static const int _pointsMax = 250;
   List<Point> _points;
 
   BuildContext _context;
@@ -77,6 +78,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     // Determine suitable max amount of points depending on window size.
     var size = MediaQuery.of(_context).size;
     var pointsMax = (size.width * size.height * _pointDensity).toInt();
+    pointsMax = min(pointsMax, _pointsMax);
 
     for (int i = 0; i < points.length || i < pointsMax; ++i) {
       if (i <= pointsMax) {
