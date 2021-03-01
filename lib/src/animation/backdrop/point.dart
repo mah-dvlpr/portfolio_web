@@ -40,7 +40,7 @@ class Point {
 
   void draw(Canvas canvas, Size canvasSize) {
     if (radiusCurrent < radiusTarget &&
-        DateTime.now().difference(dateTime).inMilliseconds > backdropTheme.tickTime30fps) {
+        DateTime.now().difference(dateTime).inMilliseconds > backdropTheme.tickMilliTime30fps) {
       radiusCurrent += radiusTarget / radiusNumberOfIncrements;
       dateTime = DateTime.now();
     }
@@ -56,7 +56,7 @@ abstract class PointEngineDelegate {
   static const maxRadius = 5.0; // TODO: Might be better to just have this as max mass?
 
   static updatePoints(List<Point> points) {
-    if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < backdropTheme.tickTime60fps) {
+    if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < backdropTheme.tickMilliTime60fps) {
       return;
     }
     dateTime = DateTime.now();

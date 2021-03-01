@@ -2,9 +2,9 @@ import 'package:flutter/material.dart';
 
 // Not necessarily part of a theme, but don't want to bother 
 // with creating a separate file for just these fields.
-final tickTime30fps = 1 / 30;
-final tickTime60fps = 1 / 60;
-final tickTime120fps = 1 / 120;
+final tickMilliTime30fps = 1000 / 30;
+final tickMilliTime60fps = 1000 / 60;
+final tickMilliTime120fps = 1000 / 120;
 
 // Colors
 final backgroundColor = Colors.cyan[900];
