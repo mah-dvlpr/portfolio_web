@@ -103,6 +103,6 @@ class _BackdropPainter extends CustomPainter {
 
   bool _isCloseEnough(Point a, Point b) {
     // 70 is just an arbitrary number. 70 times the radius of both points combined.
-    return PointEngineDelegate.hypotenuseSquared(a, b) < 70 * pow((a.radiusTarget[a.radiusTargetIndex] + b.radiusTarget[b.radiusTargetIndex]), 2);
+    return PointEngineDelegate.hypotenuseSquared(a, b) < 70 * pow((a.radiusCurrent + b.radiusCurrent), 2);
   }
 }

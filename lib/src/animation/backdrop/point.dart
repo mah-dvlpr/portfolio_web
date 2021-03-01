@@ -15,40 +15,37 @@ class Point {
   /// Force (+/-) in terms of x/y coordinates of current position on canvas.
   Offset force;
 
-  /// A Point grows from [radiusTarget.first] to [radiusTarget.last].
-  static const radiusTargetElements = 32;
-  List<double> radiusTarget;
-  int radiusTargetIndex = 0;
+  /// A Point grows...
+  static const radiusNumberOfIncrements = 32;
+  static const double radiusMin = 0.5;
+  double radiusCurrent = radiusMin;
+  double radiusTarget;
 
   // Currently purely based on radius
   double mass;
 
-  Point._(this.position, this.force, double radiusTarget) {
+  Point._(this.position, this.force, this.radiusTarget) {
     dateTime = DateTime.now();
-    this.radiusTarget = <double>[];
-    for (double i = 0.0; i <= radiusTarget; i += radiusTarget / radiusTargetElements) {
-      this.radiusTarget.add(i);
-    }
-    mass = this.radiusTarget.first;
+    mass = this.radiusCurrent;
   }
 
   static Point getRandomPoint(double maxRadius) {
     var position = Offset(random.nextDouble() * window.physicalSize.width,
                           random.nextDouble() * window.physicalSize.height);
     var initialForce = Offset(0,0);
-    var radiusTarget = random.nextDouble() * maxRadius;
+    var radiusTarget = (random.nextDouble() * maxRadius + radiusMin) % maxRadius;
 
     return Point._(position, initialForce, radiusTarget);
   }
 
   void draw(Canvas canvas, Size canvasSize) {
-    if (radiusTargetIndex < radiusTargetElements - 1 &&
+    if (radiusCurrent < radiusTarget &&
         DateTime.now().difference(dateTime).inMilliseconds > backdropTheme.tickTime30fps) {
-      ++radiusTargetIndex;
+      radiusCurrent += radiusTarget / radiusNumberOfIncrements;
       dateTime = DateTime.now();
     }
-    canvas.drawCircle(position, radiusTarget[radiusTargetIndex], pointBrush);
-    mass = this.radiusTarget[radiusTargetIndex];
+    canvas.drawCircle(position, radiusCurrent, pointBrush);
+    mass = radiusCurrent;
   }
 }
 
@@ -101,11 +98,11 @@ abstract class PointEngineDelegate {
   }
 
   static bool _pointsAreNotTouching(Point a, Point b) {
-    return (hypotenuseSquared(a, b) >= pow(a.radiusTarget[a.radiusTargetIndex] + b.radiusTarget[b.radiusTargetIndex], 2));
+    return (hypotenuseSquared(a, b) >= pow(a.radiusCurrent + b.radiusCurrent, 2));
   }
 
   static Point _combinePointsAndCreateNew(Point a, Point b) {
-    a.radiusTarget[a.radiusTarget.length - 1] = max(a.radiusTarget.last, b.radiusTarget.last);
+    a.radiusTarget = max(a.radiusTarget, b.radiusTarget);
     a.mass = max(a.mass, b.mass);
     return Point.getRandomPoint(maxRadius);
   }
