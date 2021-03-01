@@ -15,7 +15,7 @@ class BackDropDemo extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       showPerformanceOverlay: true,
       home: Stack(
-        children: [BackdropAnimation(), Text('hej')],
+        children: [BackdropAnimation()],
       ),
     );
   }

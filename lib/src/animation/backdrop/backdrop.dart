@@ -23,8 +23,6 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   void initState() {
     super.initState();
 
-    print(backdropTheme.tickTime30fps);
-
     // TODO: The framework's unbounded variant of AnimationController is a bit
     // odd as of now (1.27.0-4.0.pre). Doing this instead. (AnimationController)
     // Note: Duration does not matter here since we repeat it.
@@ -37,6 +35,8 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
     _streamController = StreamController<List<Point>>();
     _points = <Point>[];
+
+    _generateRandomPoints(_points);
 
     // Start animation (+physics)
     _animationController.repeat();
@@ -61,15 +61,14 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 
   void _notifyListeners() {
-    _generateRandomPoints(_points);
-    PointEngineDelegate.updatePoints(_points, context);
+    PointEngineDelegate.updatePoints(_points);
     _streamController.add(_points);
   }
 
   /// Will only generate points if list is not filled with [_pointsMax].
   void _generateRandomPoints(List<Point> points) {
     for (int i = points.length; i < _pointsMax; ++i) {
-      _points.add(Point.getRandomPoint(context, PointEngineDelegate.maxForce, PointEngineDelegate.maxRadius));
+      _points.add(Point.getRandomPoint(PointEngineDelegate.maxForce, PointEngineDelegate.maxRadius));
     }
   }
 }
