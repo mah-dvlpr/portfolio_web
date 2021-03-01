@@ -2,10 +2,11 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'theme.dart' as backdropTheme;
 
 class Point {
   DateTime dateTime;
-  final pointBrush = Paint()..color = Colors.lightBlue[50];
+  final pointBrush = Paint()..color = backdropTheme.foregroundColor;
   static final random = Random();
 
   /// Current position on canvas.
@@ -42,7 +43,7 @@ class Point {
 
   void draw(Canvas canvas, Size canvasSize) {
     if (radiusTargetIndex < radiusTargetElements - 1 &&
-        DateTime.now().difference(dateTime).inMilliseconds > 32) {
+        DateTime.now().difference(dateTime).inMilliseconds > backdropTheme.tickTime30fps) {
       ++radiusTargetIndex;
       dateTime = DateTime.now();
     }
@@ -58,8 +59,7 @@ abstract class PointEngineDelegate {
   static const maxRadius = 5.0; // TODO: Might be better to just have this as max mass?
 
   static updatePoints(List<Point> points, BuildContext context) {
-    // Note: < 16 ~= 60 fps, < 32 ~= 30 fps
-    if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < 16) {
+    if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < backdropTheme.tickTime60fps) {
       return;
     }
     dateTime = DateTime.now();

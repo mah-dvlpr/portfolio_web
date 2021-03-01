@@ -3,6 +3,7 @@ import 'dart:ui';
 import 'dart:math';
 
 import 'package:flutter/material.dart';
+import 'theme.dart' as backdropTheme;
 import 'point.dart';
 
 class BackdropAnimation extends StatefulWidget {
@@ -22,10 +23,14 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   void initState() {
     super.initState();
 
+    print(backdropTheme.tickTime30fps);
+
     // TODO: The framework's unbounded variant of AnimationController is a bit
-    // odd as of now (1.27.0-4.0.pre). Doing this instead. V
+    // odd as of now (1.27.0-4.0.pre). Doing this instead. (AnimationController)
+    // Note: Duration does not matter here since we repeat it.
+    // Setting it to 1 hour so that we skip unnecessary function calls.
     _animationController =
-        AnimationController(vsync: this, duration: Duration(seconds: 100));
+        AnimationController(vsync: this, duration: Duration(hours: 1));
     _animationController.addListener(() {
       _notifyListeners();
     });
@@ -70,10 +75,9 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 }
 
-/// TODO: Should probably have some kind of theme class...
 class _BackdropPainter extends CustomPainter {
-  static final backgroundBrush = Paint()..color = Colors.cyan[900];
-  static final lineStroke = Paint()..color = Colors.lightBlue[50]; // Bad coupling here, but same as in point
+  static final backgroundBrush = Paint()..color = backdropTheme.backgroundColor;
+  static final lineStroke = Paint()..color = backdropTheme.foregroundColor;
   List<Point> _points;
 
   _BackdropPainter(this._points);
