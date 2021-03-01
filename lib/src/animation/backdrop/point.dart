@@ -32,7 +32,7 @@ class Point {
     mass = this.radiusTarget.first;
   }
 
-  static Point getRandomPoint(double maxForce, double maxRadius) {
+  static Point getRandomPoint(double maxRadius) {
     var position = Offset(random.nextDouble() * window.physicalSize.width,
                           random.nextDouble() * window.physicalSize.height);
     var initialForce = Offset(0,0);
@@ -55,7 +55,7 @@ class Point {
 /// Utility class for handling physics of supplied points.
 abstract class PointEngineDelegate {
   static DateTime dateTime;
-  static const maxForce = .5;
+  static const maxForce = 1.0;
   static const maxRadius = 5.0; // TODO: Might be better to just have this as max mass?
 
   static updatePoints(List<Point> points) {
@@ -83,6 +83,8 @@ abstract class PointEngineDelegate {
           points[other] = _combinePointsAndCreateNew(points[current], points[other]);
         }
       }
+
+      _ifAboveMaxSlowDown(points[current]);
     }
   }
 
@@ -93,7 +95,7 @@ abstract class PointEngineDelegate {
           points[i].position.dx > window.physicalSize.width ||
           points[i].position.dy < 0 ||
           points[i].position.dy > window.physicalSize.height) {
-        points[i] = Point.getRandomPoint(maxForce, maxRadius);
+        points[i] = Point.getRandomPoint(maxRadius);
       }
     }
   }
@@ -105,7 +107,7 @@ abstract class PointEngineDelegate {
   static Point _combinePointsAndCreateNew(Point a, Point b) {
     a.radiusTarget[a.radiusTarget.length - 1] = max(a.radiusTarget.last, b.radiusTarget.last);
     a.mass = max(a.mass, b.mass);
-    return Point.getRandomPoint(maxForce, maxRadius);
+    return Point.getRandomPoint(maxRadius);
   }
 
   static void _addMutualForce(Point a, Point b) {
@@ -118,16 +120,17 @@ abstract class PointEngineDelegate {
     
     // Apply attraction to each point
     var additiveForce = Offset(attractionX, attractionY);
-    // if (_isBelowForceLimit(a)) { // Max force limit
-      a.force += additiveForce;
-    // }
-    // if (_isBelowForceLimit(b)) { // Max force limit
-      b.force += -additiveForce; // Equal, but opposite direction
-    // }
+    a.force += additiveForce;
+    b.force += -additiveForce; // Equal, but opposite direction
   }
 
-  // Removed (not called) for now. Might reimplement later
-  static bool _isBelowForceLimit(Point a) {
-    return sqrt(pow(a.force.dx.abs(), 2) + pow(a.force.dy.abs(), 2)) < maxForce;
+  static void _ifAboveMaxSlowDown(Point a) {
+    // // Slow it down gradually
+    // if (a.force.dx > 0) { 
+    //   a.force -= Offset(a.force.dx - maxForce, a.force.dy); 
+    // } else {
+    //   a.force += Offset(a.force.dx * 0.8, a.force.dy); 
+    // }
+    // if (a.force.dy > maxForce) { a.force = Offset(a.force.dx, a.force.dy * 0.8); }
   }
 }

@@ -68,7 +68,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   /// Will only generate points if list is not filled with [_pointsMax].
   void _generateRandomPoints(List<Point> points) {
     for (int i = points.length; i < _pointsMax; ++i) {
-      _points.add(Point.getRandomPoint(PointEngineDelegate.maxForce, PointEngineDelegate.maxRadius));
+      _points.add(Point.getRandomPoint(PointEngineDelegate.maxRadius));
     }
   }
 }
