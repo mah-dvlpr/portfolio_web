@@ -15,6 +15,10 @@ GIT_PATH='./build/web'
 TARGET_REPO='git@github.com:mah-dvlpr/mah-dvlpr.github.io.git'
 SRC_REPO="# About:\nThis repo/commit is a snapshot of a build generated via the repo $(git config --get remote.origin.url | tr ':' '/' | sed -e 's#git@#https://#' -e 's/.git$//')"
 
+# Build project
+flutter build web
+
+# Push
 cd "${GIT_PATH}"
 rm -rf .git
 git init
