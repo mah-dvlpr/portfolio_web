@@ -49,7 +49,6 @@ class _BackdropAnimationState extends State<BackdropAnimation>
       builder: (_, snapshot) => CustomPaint(
         painter: _BackdropPainter(snapshot.data),
         willChange: true,
-        isComplex: true,
       ),
     );
   }
