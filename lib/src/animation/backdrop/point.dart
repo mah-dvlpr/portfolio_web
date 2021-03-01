@@ -118,14 +118,15 @@ abstract class PointEngineDelegate {
     
     // Apply attraction to each point
     var additiveForce = Offset(attractionX, attractionY);
-    if (_isBelowForceLimit(a)) { // Max force limit
+    // if (_isBelowForceLimit(a)) { // Max force limit
       a.force += additiveForce;
-    }
-    if (_isBelowForceLimit(b)) { // Max force limit
+    // }
+    // if (_isBelowForceLimit(b)) { // Max force limit
       b.force += -additiveForce; // Equal, but opposite direction
-    }
+    // }
   }
 
+  // Removed (not called) for now. Might reimplement later
   static bool _isBelowForceLimit(Point a) {
     return sqrt(pow(a.force.dx.abs(), 2) + pow(a.force.dy.abs(), 2)) < maxForce;
   }
