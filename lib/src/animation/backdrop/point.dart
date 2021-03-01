@@ -55,7 +55,7 @@ class Point {
 /// Utility class for handling physics of supplied points.
 abstract class PointEngineDelegate {
   static DateTime dateTime;
-  static const maxForce = 2.0;
+  static const maxForce = 2.00;
   static const maxRadius = 5.0; // TODO: Might be better to just have this as max mass?
 
   static updatePoints(List<Point> points, BuildContext context) {
