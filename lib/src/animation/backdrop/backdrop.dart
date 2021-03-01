@@ -16,7 +16,9 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   AnimationController _animationController;
   StreamController<List<Point>> _streamController;
 
-  static const int _pointsMax = 50;
+  /// The density (number of points) per window area.
+  /// Per 100 * 100 I want 1 point(s).
+  static const double _pointDensity = 1 / (100 * 100);
   List<Point> _points;
 
   @override
@@ -35,8 +37,6 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
     _streamController = StreamController<List<Point>>();
     _points = <Point>[];
-
-    _generateRandomPoints(_points);
 
     // Start animation (+physics)
     _animationController.repeat();
@@ -61,14 +61,23 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 
   void _notifyListeners() {
+    _generateRandomPoints(_points);
     PointEngineDelegate.updatePoints(_points);
     _streamController.add(_points);
   }
 
-  /// Will only generate points if list is not filled with [_pointsMax].
+  /// Will only generate points if list is not filled.
+  /// Removes points if necessary.
   void _generateRandomPoints(List<Point> points) {
-    for (int i = points.length; i < _pointsMax; ++i) {
-      _points.add(Point.getRandomPoint(PointEngineDelegate.maxRadius));
+    // Determine suitable max amount of points depending on window size.
+    var pointsMax = (window.physicalSize.width * window.physicalSize.height * _pointDensity).toInt();
+
+    for (int i = 0; i < points.length || i < pointsMax; ++i) {
+      if (i <= pointsMax) {
+        _points.add(Point.getRandomPoint(PointEngineDelegate.maxRadius));
+      } else {
+        _points.removeRange(i, points.length);
+      }
     }
   }
 }
