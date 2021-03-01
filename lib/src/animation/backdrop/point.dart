@@ -2,10 +2,11 @@ import 'dart:math';
 import 'dart:ui';
 
 import 'package:flutter/material.dart';
+import 'theme.dart' as backdropTheme;
 
 class Point {
   DateTime dateTime;
-  final pointBrush = Paint()..color = Colors.lightBlue[50];
+  final pointBrush = Paint()..color = backdropTheme.foregroundColor;
   static final random = Random();
 
   /// Current position on canvas.
@@ -42,7 +43,7 @@ class Point {
 
   void draw(Canvas canvas, Size canvasSize) {
     if (radiusTargetIndex < radiusTargetElements - 1 &&
-        DateTime.now().difference(dateTime).inMilliseconds > 64) {
+        DateTime.now().difference(dateTime).inMilliseconds > backdropTheme.tickTime30fps) {
       ++radiusTargetIndex;
       dateTime = DateTime.now();
     }
@@ -52,21 +53,24 @@ class Point {
 }
 
 /// Utility class for handling physics of supplied points.
-class PointEngineDelegate {
+abstract class PointEngineDelegate {
   static DateTime dateTime;
   static const maxForce = .5;
   static const maxRadius = 5.0; // TODO: Might be better to just have this as max mass?
 
-  PointEngineDelegate();
-
   static updatePoints(List<Point> points, BuildContext context) {
-    // Note: < 16 ~= 60 fps, < 32 ~= 30 fps
-    if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < 32) {
+    if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < backdropTheme.tickTime60fps) {
       return;
     }
     dateTime = DateTime.now();
     _updatePointSpeedPerAdjacentPoints(points, context);
     _updatePointPosition(points, context);
+  }
+
+  static double hypotenuseSquared(Point a, Point b) {
+    var dx = pow((a.position.dx - b.position.dx).abs(), 2);
+    var dy = pow((a.position.dy - b.position.dy).abs(), 2);
+    return dx + dy;
   }
 
   static _updatePointSpeedPerAdjacentPoints(List<Point> points, BuildContext context) {
@@ -99,8 +103,8 @@ class PointEngineDelegate {
   }
 
   static Point _combinePointsAndCreateNew(Point a, Point b, BuildContext context) {
-    // a.radiusTarget[a.radiusTargetIndex] = max(a.radiusTarget.last, b.radiusTarget.last);
-    // a.mass = max(a.mass, b.mass);
+    a.radiusTarget[a.radiusTarget.length - 1] = max(a.radiusTarget.last, b.radiusTarget.last);
+    a.mass = max(a.mass, b.mass);
     return Point.getRandomPoint(context, maxForce, maxRadius);
   }
 
@@ -124,11 +128,5 @@ class PointEngineDelegate {
 
   static bool _isBelowForceLimit(Point a) {
     return sqrt(pow(a.force.dx.abs(), 2) + pow(a.force.dy.abs(), 2)) < maxForce;
-  }
-
-  static double hypotenuseSquared(Point a, Point b) {
-    var dx = pow((a.position.dx - b.position.dx).abs(), 2);
-    var dy = pow((a.position.dy - b.position.dy).abs(), 2);
-    return dx + dy;
   }
 }
