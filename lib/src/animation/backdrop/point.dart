@@ -32,9 +32,9 @@ class Point {
     mass = this.radiusTarget.first;
   }
 
-  static Point getRandomPoint(BuildContext context, double maxForce, double maxRadius) {
-    var position = Offset(random.nextDouble() * MediaQuery.of(context).size.width,
-                          random.nextDouble() * MediaQuery.of(context).size.height);
+  static Point getRandomPoint(double maxForce, double maxRadius) {
+    var position = Offset(random.nextDouble() * window.physicalSize.width,
+                          random.nextDouble() * window.physicalSize.height);
     var initialForce = Offset(0,0);
     var radiusTarget = random.nextDouble() * maxRadius;
 
@@ -55,16 +55,16 @@ class Point {
 /// Utility class for handling physics of supplied points.
 abstract class PointEngineDelegate {
   static DateTime dateTime;
-  static const maxForce = 2.00;
+  static const maxForce = .5;
   static const maxRadius = 5.0; // TODO: Might be better to just have this as max mass?
 
-  static updatePoints(List<Point> points, BuildContext context) {
+  static updatePoints(List<Point> points) {
     if (dateTime != null && DateTime.now().difference(dateTime).inMilliseconds < backdropTheme.tickTime60fps) {
       return;
     }
     dateTime = DateTime.now();
-    _updatePointSpeedPerAdjacentPoints(points, context);
-    _updatePointPosition(points, context);
+    _updatePointSpeedPerAdjacentPoints(points);
+    _updatePointPosition(points);
   }
 
   static double hypotenuseSquared(Point a, Point b) {
@@ -73,27 +73,27 @@ abstract class PointEngineDelegate {
     return dx + dy;
   }
 
-  static _updatePointSpeedPerAdjacentPoints(List<Point> points, BuildContext context) {
+  static _updatePointSpeedPerAdjacentPoints(List<Point> points) {
     // For current object, update and apply force for every other object
     for (int current = 0; current < points.length - 1; ++current) {
       for (int other = current + 1; other < points.length; ++other) {
         if (_pointsAreNotTouching(points[current], points[other])) {
           _addMutualForce(points[current], points[other]);
         } else {
-          points[other] = _combinePointsAndCreateNew(points[current], points[other], context);
+          points[other] = _combinePointsAndCreateNew(points[current], points[other]);
         }
       }
     }
   }
 
-  static _updatePointPosition(List<Point> points, context) {
+  static _updatePointPosition(List<Point> points) {
     for (int i = 0; i < points.length; ++i) {
       points[i].position += points[i].force;
       if (points[i].position.dx < 0 ||
-          points[i].position.dx > MediaQuery.of(context).size.width ||
+          points[i].position.dx > window.physicalSize.width ||
           points[i].position.dy < 0 ||
-          points[i].position.dy > MediaQuery.of(context).size.height) {
-        points[i] = Point.getRandomPoint(context, maxForce, maxRadius);
+          points[i].position.dy > window.physicalSize.height) {
+        points[i] = Point.getRandomPoint(maxForce, maxRadius);
       }
     }
   }
@@ -102,10 +102,10 @@ abstract class PointEngineDelegate {
     return (hypotenuseSquared(a, b) >= pow(a.radiusTarget[a.radiusTargetIndex] + b.radiusTarget[b.radiusTargetIndex], 2));
   }
 
-  static Point _combinePointsAndCreateNew(Point a, Point b, BuildContext context) {
+  static Point _combinePointsAndCreateNew(Point a, Point b) {
     a.radiusTarget[a.radiusTarget.length - 1] = max(a.radiusTarget.last, b.radiusTarget.last);
     a.mass = max(a.mass, b.mass);
-    return Point.getRandomPoint(context, maxForce, maxRadius);
+    return Point.getRandomPoint(maxForce, maxRadius);
   }
 
   static void _addMutualForce(Point a, Point b) {

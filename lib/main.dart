@@ -13,8 +13,10 @@ class BackDropDemo extends StatelessWidget {
   Widget build(BuildContext context) {
     return MaterialApp(
       debugShowCheckedModeBanner: false,
-      // showPerformanceOverlay: true,
-      home: BackdropAnimation(),
+      showPerformanceOverlay: true,
+      home: Stack(
+        children: [BackdropAnimation()],
+      ),
     );
   }
 }
