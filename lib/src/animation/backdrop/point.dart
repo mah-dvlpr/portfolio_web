@@ -17,8 +17,8 @@ class Point {
 
   /// A Point grows...
   static const radiusNumberOfIncrements = 32;
-  static const double radiusMin = 0.5;
-  double radiusCurrent = radiusMin;
+  static const double radiusMin = 1.0;
+  double radiusCurrent;
   double radiusTarget;
 
   // Currently purely based on radius
@@ -26,6 +26,7 @@ class Point {
 
   Point._(this.position, this.force, this.radiusTarget) {
     dateTime = DateTime.now();
+    this.radiusCurrent = radiusMin;
     mass = this.radiusCurrent;
   }
 
@@ -34,7 +35,7 @@ class Point {
     var position = Offset(random.nextDouble() * size.width,
                           random.nextDouble() * size.height);
     var initialForce = Offset(0,0);
-    var radiusTarget = (random.nextDouble() * maxRadius + radiusMin) % maxRadius;
+    var radiusTarget = min((random.nextDouble() * (maxRadius - radiusMin) + radiusMin), maxRadius);
 
     return Point._(position, initialForce, radiusTarget);
   }
@@ -45,6 +46,7 @@ class Point {
       dateTime = DateTime.now();
       radiusCurrent += min(radiusTarget / radiusNumberOfIncrements, radiusTarget);
     }
+
     canvas.drawCircle(position, radiusCurrent, pointBrush);
     mass = radiusCurrent;
   }
