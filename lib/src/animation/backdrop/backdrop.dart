@@ -17,8 +17,8 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   StreamController<List<Point>> _streamController;
 
   /// The density (number of points) per window area.
-  /// Per 100 * 100 I want 1 point(s).
-  static const double _pointDensity = 1 / (100 * 100);
+  /// Per 200 * 200 I want 1 point(s).
+  static const double _pointDensity = 1 / (200 * 200);
   List<Point> _points;
 
   @override
