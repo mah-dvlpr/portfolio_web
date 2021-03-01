@@ -29,9 +29,10 @@ class Point {
     mass = this.radiusCurrent;
   }
 
-  static Point getRandomPoint(double maxRadius) {
-    var position = Offset(random.nextDouble() * window.physicalSize.width,
-                          random.nextDouble() * window.physicalSize.height);
+  static Point getRandomPoint(double maxRadius, BuildContext context) {
+    var size = MediaQuery.of(context).size;
+    var position = Offset(random.nextDouble() * size.width,
+                          random.nextDouble() * size.height);
     var initialForce = Offset(0,0);
     var radiusTarget = (random.nextDouble() * maxRadius + radiusMin) % maxRadius;
 
@@ -55,13 +56,13 @@ abstract class PointEngineDelegate {
   static const maxForce = 1.0;
   static const maxRadius = 5.0; // TODO: Might be better to just have this as max mass?
 
-  static updatePoints(List<Point> points) {
+  static updatePoints(List<Point> points, BuildContext context) {
     if (DateTime.now().difference(dateTime).inMilliseconds < backdropTheme.tickMilliTime60fps) {
       return;
     }
     dateTime = DateTime.now();
-    _updatePointSpeedPerAdjacentPoints(points);
-    _updatePointPosition(points);
+    _updatePointSpeedPerAdjacentPoints(points, context);
+    _updatePointPosition(points, context);
   }
 
   static double hypotenuseSquared(Point a, Point b) {
@@ -70,14 +71,14 @@ abstract class PointEngineDelegate {
     return dx + dy;
   }
 
-  static _updatePointSpeedPerAdjacentPoints(List<Point> points) {
+  static _updatePointSpeedPerAdjacentPoints(List<Point> points, BuildContext context) {
     // For current object, update and apply force for every other object
     for (int current = 0; current < points.length - 1; ++current) {
       for (int other = current + 1; other < points.length; ++other) {
         if (_pointsAreNotTouching(points[current], points[other])) {
           _addMutualForce(points[current], points[other]);
         } else {
-          points[other] = _combinePointsAndCreateNew(points[current], points[other]);
+          points[other] = _combinePointsAndCreateNew(points[current], points[other], context);
         }
       }
 
@@ -85,14 +86,16 @@ abstract class PointEngineDelegate {
     }
   }
 
-  static _updatePointPosition(List<Point> points) {
+  static _updatePointPosition(List<Point> points, BuildContext context) {
+    var size = MediaQuery.of(context).size;
+
     for (int i = 0; i < points.length; ++i) {
       points[i].position += points[i].force;
       if (points[i].position.dx < 0 ||
-          points[i].position.dx > window.physicalSize.width ||
+          points[i].position.dx > size.width ||
           points[i].position.dy < 0 ||
-          points[i].position.dy > window.physicalSize.height) {
-        points[i] = Point.getRandomPoint(maxRadius);
+          points[i].position.dy > size.height) {
+        points[i] = Point.getRandomPoint(maxRadius, context);
       }
     }
   }
@@ -101,10 +104,10 @@ abstract class PointEngineDelegate {
     return (hypotenuseSquared(a, b) >= pow(a.radiusCurrent + b.radiusCurrent, 2));
   }
 
-  static Point _combinePointsAndCreateNew(Point a, Point b) {
+  static Point _combinePointsAndCreateNew(Point a, Point b, BuildContext context) {
     a.radiusTarget = max(a.radiusTarget, b.radiusTarget);
     a.mass = max(a.mass, b.mass);
-    return Point.getRandomPoint(maxRadius);
+    return Point.getRandomPoint(maxRadius, context);
   }
 
   static void _addMutualForce(Point a, Point b) {

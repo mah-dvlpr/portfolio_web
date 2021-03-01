@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:js';
 import 'dart:ui';
 import 'dart:math';
 
@@ -20,6 +21,8 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   /// Per 200 * 200 I want 1 point(s).
   static const double _pointDensity = 1 / (200 * 200);
   List<Point> _points;
+
+  BuildContext _context;
 
   @override
   void initState() {
@@ -44,10 +47,12 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
   @override
   Widget build(BuildContext context) {
+    _context = context;
+
     return StreamBuilder<List<Point>>(
       stream: _streamController.stream,
-      builder: (_, snapshot) => CustomPaint(
-        painter: _BackdropPainter(snapshot.data),
+      builder: (context, snapshot) => CustomPaint(
+        painter: _BackdropPainter(context, snapshot.data),
         willChange: true,
       ),
     );
@@ -62,7 +67,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
   void _notifyListeners() {
     _generateRandomPoints(_points);
-    PointEngineDelegate.updatePoints(_points);
+    PointEngineDelegate.updatePoints(_points, _context);
     _streamController.add(_points);
   }
 
@@ -70,11 +75,12 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   /// Removes points if necessary.
   void _generateRandomPoints(List<Point> points) {
     // Determine suitable max amount of points depending on window size.
-    var pointsMax = (window.physicalSize.width * window.physicalSize.height * _pointDensity).toInt();
+    var size = MediaQuery.of(_context).size;
+    var pointsMax = (size.width * size.height * _pointDensity).toInt();
 
     for (int i = 0; i < points.length || i < pointsMax; ++i) {
       if (i <= pointsMax) {
-        _points.add(Point.getRandomPoint(PointEngineDelegate.maxRadius));
+        _points.add(Point.getRandomPoint(PointEngineDelegate.maxRadius, _context));
       } else {
         _points.removeRange(i, points.length);
       }
@@ -86,12 +92,20 @@ class _BackdropPainter extends CustomPainter {
   static final backgroundBrush = Paint()..color = backdropTheme.backgroundColor;
   static final lineStroke = Paint()..color = backdropTheme.foregroundColor;
   List<Point> _points;
+  BuildContext _context;
 
-  _BackdropPainter(this._points);
+  _BackdropPainter(this._context, this._points);
 
   @override
-  void paint(Canvas canvas, Size size) {
-    canvas.drawRect(Rect.largest, backgroundBrush);
+  void paint(Canvas canvas, Size _) {
+    var size = MediaQuery.of(_context).size;
+    canvas.drawRect(Rect.fromCenter(
+      center: Offset(size.width / 2,
+                     size.height / 2),
+      width: size.width,
+      height: size.height
+      ), 
+      backgroundBrush);
 
     for (int current = 0; current < _points.length - 1; ++current) {
       // Draw point itself
