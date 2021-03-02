@@ -33,7 +33,7 @@ class Point {
     radiusMax = min(Point.radiusMax, radiusMax);
     this.radiusTarget = random.nextDouble() * (radiusMax - radiusMin) + radiusMin;
     this.radiusCurrent = radiusMin;
-    mass = this.radiusCurrent;
+    this.mass = this.radiusCurrent;
   }
 
   static Point getRandomPoint(BuildContext context) {
@@ -63,10 +63,10 @@ class Point {
       dateTime = DateTime.now();
       radiusCurrent +=
           min(radiusTarget / radiusNumberOfIncrements, radiusTarget);
+      mass = radiusCurrent;
     }
 
     canvas.drawCircle(position, radiusCurrent, pointBrush);
-    mass = radiusCurrent;
   }
 }
 
@@ -131,7 +131,7 @@ abstract class PointEngineDelegate {
   // TODO: Fix
   static void _addMutualForce(Point a, Point b) {
     // Determine magnitude of attraction (some pseudo science here)
-    var attraction = 3 * a.mass * b.mass / (a.position+b.position).distanceSquared;
+    var attraction = 3 * a.mass * b.mass / (a.position-b.position).distanceSquared;
 
     // Determine direction (based on the perspective of point 'a')
     var attractionX =
