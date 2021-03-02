@@ -163,12 +163,14 @@ class _BackdropPainter extends CustomPainter {
   void _drawLinesToAllOtherNodes(Canvas canvas, Node node, int indexStart) {
     var linePaint = Paint();
     for (int i = indexStart; i < _paintable.nodes.length; ++i) {
-      var distance = (node.position-_paintable.nodes[i].position).distance;
+      var distance = (node.position - _paintable.nodes[i].position).distance;
       linePaint.color = Color.fromRGBO(
-        backdropTheme.foregroundColor.red,
-        backdropTheme.foregroundColor.green,
-        backdropTheme.foregroundColor.blue,
-        (distance < _lineDistanceLimit) ? 1.0 - distance / _lineDistanceLimit : 0);
+          backdropTheme.foregroundColor.red,
+          backdropTheme.foregroundColor.green,
+          backdropTheme.foregroundColor.blue,
+          (distance < _lineDistanceLimit)
+              ? 1.0 - distance / _lineDistanceLimit
+              : 0);
 
       canvas.drawLine(node.position, _paintable.nodes[i].position, linePaint);
     }

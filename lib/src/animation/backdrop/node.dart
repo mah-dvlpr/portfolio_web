@@ -30,7 +30,8 @@ class Node {
   Node(this.position, this.velocity, double radiusMax) {
     dateTime = DateTime.now();
     radiusMax = min(Node.radiusMax, radiusMax);
-    this.radiusTarget = random.nextDouble() * (radiusMax - radiusMin) + radiusMin;
+    this.radiusTarget =
+        random.nextDouble() * (radiusMax - radiusMin) + radiusMin;
     this.radiusCurrent = radiusMin;
     this.mass = this.radiusCurrent;
   }
@@ -70,7 +71,7 @@ class Node {
 }
 
 /// Utility class for handling physics of supplied nodes.
-// TODO: Might be better to have  this as a kind of singleton to call it a 
+// TODO: Might be better to have  this as a kind of singleton to call it a
 // delegate?
 abstract class NodeEngine {
   static DateTime dateTime = DateTime.now();
@@ -95,7 +96,9 @@ abstract class NodeEngine {
         }
       }
 
-      if (nodes[i] == null) { continue; }
+      if (nodes[i] == null) {
+        continue;
+      }
 
       var size = MediaQuery.of(context).size;
       nodes[i].position += nodes[i].velocity;
@@ -109,13 +112,17 @@ abstract class NodeEngine {
   }
 
   static bool _areNodesTouching(Node a, Node b) {
-    return (a.position-b.position).distanceSquared < pow(a.radiusCurrent + b.radiusCurrent, 2);
+    return (a.position - b.position).distanceSquared <
+        pow(a.radiusCurrent + b.radiusCurrent, 2);
   }
 
   static void _combineNodes(
       List<Node> nodes, int a, int b, BuildContext context) {
     nodes[b].radiusTarget = max(nodes[a].radiusTarget, nodes[b].radiusTarget);
-    nodes[b].velocity = (nodes[a].velocity * nodes[a].mass / (nodes[a].mass + nodes[b].mass)) + (nodes[b].velocity * nodes[b].mass / (nodes[a].mass + nodes[a].mass));
+    nodes[b].velocity = (nodes[a].velocity *
+            nodes[a].mass /
+            (nodes[a].mass + nodes[b].mass)) +
+        (nodes[b].velocity * nodes[b].mass / (nodes[a].mass + nodes[a].mass));
     nodes[b].mass = max(nodes[a].mass, nodes[b].mass);
     nodes[a] = null;
   }
@@ -123,7 +130,8 @@ abstract class NodeEngine {
   // TODO: Fix
   static void _addMutualForce(Node a, Node b) {
     // Determine magnitude of attraction (some pseudo science here)
-    var attraction = 3 * a.mass * b.mass / (a.position-b.position).distanceSquared;
+    var attraction =
+        3 * a.mass * b.mass / (a.position - b.position).distanceSquared;
 
     // Determine direction (based on the perspective of node 'a')
     var attractionX =
