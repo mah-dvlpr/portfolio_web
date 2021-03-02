@@ -5,7 +5,7 @@ import 'dart:math';
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'theme.dart' as backdropTheme;
-import 'point.dart';
+import 'node.dart';
 
 // TODO: Add documentation...
 
@@ -18,14 +18,13 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     with SingleTickerProviderStateMixin {
   AnimationController _animationController;
   StreamController<_Paintable> _streamController;
-
-  /// The density (number of points) per window area.
-  /// Per (x * x) pixels we want z points.
-  static const double _pointDensity = 1 / (200 * 200);
-  static const int _pointsMax = 256;
-  _Paintable _paintable;
-
   BuildContext _context;
+
+  /// The density (number of nodes) per window area.
+  /// Per (x * x) pixels we want z nodes.
+  static const double _nodeDensity = 1 / (200 * 200);
+  static const int _nodesMax = 5;
+  _Paintable _paintable;
 
   @override
   void initState() {
@@ -52,9 +51,9 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     var size = MediaQuery.of(_context).size;
 
     return GestureDetector(
-      onPanStart: (details) => _addUserPoint(details.localPosition),
-      onPanUpdate: (details) => _addUserPoint(details.localPosition),
-      onPanEnd: (_) => _addUserPointToList(),
+      onPanStart: (details) => _addUserNode(details.localPosition),
+      onPanUpdate: (details) => _addUserNode(details.localPosition),
+      onPanEnd: (_) => _addUserNodeToList(),
       child: StreamBuilder<_Paintable>(
         stream: _streamController.stream,
         builder: (context, snapshot) => SizedBox(
@@ -77,44 +76,44 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 
   void _renderFrame() {
-    _regulateAmountOfPoints(_paintable._points);
-    PointEngineDelegate.updatePoints(_paintable._points, _context);
+    _regulateNodeAmount(_paintable.nodes);
+    NodeEngine.updateNodes(_paintable.nodes, _context);
     _streamController.add(_paintable);
   }
 
-  void _regulateAmountOfPoints(List<Point> points) {
-    // Determine suitable max amount of points depending on window size.
+  void _regulateNodeAmount(List<Node> nodes) {
+    // Determine suitable max amount of nodes depending on window size.
     var size = MediaQuery.of(_context).size;
-    var pointsMax = (size.width * size.height * _pointDensity).toInt();
-    pointsMax = min(pointsMax, _pointsMax);
+    var nodesMax = (size.width * size.height * _nodeDensity).toInt();
+    nodesMax = min(nodesMax, _nodesMax);
 
-    // Either add points if point density is not reached, 
-    // or remove points if we have too many.
-    for (int i = min(pointsMax, points.length); i < max(pointsMax, points.length); ++i) {
-      if (i < pointsMax) {
+    // Either add nodes if node density is not reached, 
+    // or remove nodes if we have too many.
+    for (int i = min(nodesMax, nodes.length); i < max(nodesMax, nodes.length); ++i) {
+      if (i < nodesMax) {
         // Generate
-        points
-            .add(Point.getRandomPoint(_context));
+        nodes
+            .add(Node.getRandomNode(_context));
       } else {
         // Delete
-        points.removeRange(i, points.length);
+        nodes.removeRange(i, nodes.length);
       }
     }
   }
 
-  void _addUserPoint(Offset localPosition) {
-    _paintable._userPoint = Point(localPosition, Offset(0, 0), Point.radiusMax);
+  void _addUserNode(Offset localPosition) {
+    _paintable.userNode = Node(localPosition, Offset(0, 0), Node.radiusMax);
   }
 
-  void _addUserPointToList() {
-    _paintable._points.replaceRange(0, 0, [_paintable._userPoint]);
-    _paintable._userPoint = null;
+  void _addUserNodeToList() {
+    _paintable.nodes.replaceRange(0, 0, [_paintable.userNode]);
+    _paintable.userNode = null;
   }
 }
 
 class _Paintable {
-  List<Point> _points = <Point>[];
-  Point _userPoint;
+  List<Node> nodes = <Node>[];
+  Node userNode;
 }
 
 class _BackdropPainter extends CustomPainter {
@@ -136,15 +135,15 @@ class _BackdropPainter extends CustomPainter {
             height: size.height),
         _backgroundBrush);
 
-    // For each point
-    for (int current = 0; current < _paintable._points.length; ++current) {
-      drawLinesToAllOtherPoints(canvas, _paintable._points[current]);
-      _paintable._points[current].draw(canvas, size);
+    // For each node
+    for (int current = 0; current < _paintable.nodes.length; ++current) {
+      drawLinesToAllOtherNodes(canvas, _paintable.nodes[current]);
+      _paintable.nodes[current].draw(canvas, size);
     }
 
     // Extra for user input
-    if (_paintable._userPoint != null) {
-      drawLinesToAllOtherPoints(canvas, _paintable._userPoint);
+    if (_paintable.userNode != null) {
+      drawLinesToAllOtherNodes(canvas, _paintable.userNode);
     }
   }
 
@@ -153,21 +152,21 @@ class _BackdropPainter extends CustomPainter {
     return oldDelegate != this;
   }
 
-  void drawLinesToAllOtherPoints(Canvas canvas, Point point) {
+  void drawLinesToAllOtherNodes(Canvas canvas, Node node) {
     var linePaint = Paint();
-    for (final other in _paintable._points) {
-      if (other == point) {
+    for (final other in _paintable.nodes) {
+      if (other == node) {
         continue;
       }
 
-      var distance = (point.position-other.position).distance;
+      var distance = (node.position-other.position).distance;
       linePaint.color = Color.fromRGBO(
         backdropTheme.foregroundColor.red,
         backdropTheme.foregroundColor.green,
         backdropTheme.foregroundColor.blue,
         (distance < _lineDistanceLimit) ? 1.0 - distance / _lineDistanceLimit : 0);
 
-      canvas.drawLine(point.position, other.position, linePaint);
+      canvas.drawLine(node.position, other.position, linePaint);
     }
   }
 }

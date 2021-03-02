@@ -4,9 +4,9 @@ import 'dart:ui';
 import 'package:flutter/material.dart';
 import 'theme.dart' as backdropTheme;
 
-class Point {
+class Node {
   static final random = Random();
-  final pointBrush = Paint()..color = Colors.white;
+  final nodeBrush = Paint()..color = Colors.white;
   DateTime dateTime;
 
   /// Current position on canvas.
@@ -16,7 +16,7 @@ class Point {
   static const double velocityMax = 1.0;
   Offset velocity;
 
-  /// A Point grows...
+  /// A Node grows...
   static const radiusNumberOfIncrements = 32;
   static const double radiusMin = 1.0;
   static const double radiusMax = 4.0;
@@ -27,15 +27,15 @@ class Point {
   double mass;
 
   /// [radiusMax] larger than the class static [radiusMax], will not be honored.
-  Point(this.position, this.velocity, double radiusMax) {
+  Node(this.position, this.velocity, double radiusMax) {
     dateTime = DateTime.now();
-    radiusMax = min(Point.radiusMax, radiusMax);
+    radiusMax = min(Node.radiusMax, radiusMax);
     this.radiusTarget = random.nextDouble() * (radiusMax - radiusMin) + radiusMin;
     this.radiusCurrent = radiusMin;
     this.mass = this.radiusCurrent;
   }
 
-  static Point getRandomPoint(BuildContext context) {
+  static Node getRandomNode(BuildContext context) {
     var size = MediaQuery.of(context).size;
     var position = Offset(
         random.nextDouble() * size.width, random.nextDouble() * size.height);
@@ -51,7 +51,7 @@ class Point {
     b = random.nextBool() ? -b : b;
     var velocity = Offset(a, b);
 
-    return Point(position, velocity, radiusMax);
+    return Node(position, velocity, radiusMax);
   }
 
   void draw(Canvas canvas, Size canvasSize) {
@@ -65,17 +65,17 @@ class Point {
       mass = radiusCurrent;
     }
 
-    canvas.drawCircle(position, radiusCurrent, pointBrush);
+    canvas.drawCircle(position, radiusCurrent, nodeBrush);
   }
 }
 
-/// Utility class for handling physics of supplied points.
+/// Utility class for handling physics of supplied nodes.
 // TODO: Might be better to have  this as a kind of singleton to call it a 
 // delegate?
-abstract class PointEngineDelegate {
+abstract class NodeEngine {
   static DateTime dateTime = DateTime.now();
 
-  static updatePoints(List<Point> points, BuildContext context) {
+  static updateNodes(List<Node> nodes, BuildContext context) {
     // Update time - Only render when wanted
     if (DateTime.now().difference(dateTime).inMilliseconds <
         backdropTheme.tickMilliTime60fps) {
@@ -83,63 +83,63 @@ abstract class PointEngineDelegate {
     }
     dateTime = DateTime.now();
 
-    // Update points
-    _updatePointsVelocities(points, context);
-    _updatePointsPositions(points, context);
+    // Update nodes
+    _updateNodesVelocities(nodes, context);
+    _updateNodesPositions(nodes, context);
   }
 
-  static _updatePointsVelocities(
-      List<Point> points, BuildContext context) {
-    // For current point, update and apply force for every other point
-    for (int current = 0; current < points.length - 1; ++current) {
-      for (int other = current + 1; other < points.length; ++other) {
-        if (_arePointsTouching(points[current], points[other])) {
-          _combinePoints(points, current, other, context);
+  static _updateNodesVelocities(
+      List<Node> nodes, BuildContext context) {
+    // For current node, update and apply force for every other node
+    for (int current = 0; current < nodes.length - 1; ++current) {
+      for (int other = current + 1; other < nodes.length; ++other) {
+        if (_areNodesTouching(nodes[current], nodes[other])) {
+          _combineNodes(nodes, current, other, context);
         } else {
-          _addMutualForce(points[current], points[other]);
+          _addMutualForce(nodes[current], nodes[other]);
         }
       }
     }
   }
 
-  static _updatePointsPositions(List<Point> points, BuildContext context) {
+  static _updateNodesPositions(List<Node> nodes, BuildContext context) {
     var size = MediaQuery.of(context).size;
 
-    for (int i = 0; i < points.length; ++i) {
-      points[i].position += points[i].velocity;
-      if (points[i].position.dx < 0 ||
-          points[i].position.dx > size.width ||
-          points[i].position.dy < 0 ||
-          points[i].position.dy > size.height) {
-        points.removeAt(i);
+    for (int i = 0; i < nodes.length; ++i) {
+      nodes[i].position += nodes[i].velocity;
+      if (nodes[i].position.dx < 0 ||
+          nodes[i].position.dx > size.width ||
+          nodes[i].position.dy < 0 ||
+          nodes[i].position.dy > size.height) {
+        nodes.removeAt(i);
       }
     }
   }
 
-  static bool _arePointsTouching(Point a, Point b) {
+  static bool _areNodesTouching(Node a, Node b) {
     return (a.position-b.position).distanceSquared < pow(a.radiusCurrent + b.radiusCurrent, 2);
   }
 
-  static void _combinePoints(
-      List<Point> points, int a, int b, BuildContext context) {
-    points[a].radiusTarget = max(points[a].radiusTarget, points[b].radiusTarget);
-    points[a].velocity = (points[a].velocity * points[a].mass / (points[a].mass + points[b].mass)) + (points[b].velocity * points[b].mass / (points[a].mass + points[a].mass));
-    points[a].mass = max(points[a].mass, points[b].mass);
-    points.removeAt(b);
+  static void _combineNodes(
+      List<Node> nodes, int a, int b, BuildContext context) {
+    nodes[a].radiusTarget = max(nodes[a].radiusTarget, nodes[b].radiusTarget);
+    nodes[a].velocity = (nodes[a].velocity * nodes[a].mass / (nodes[a].mass + nodes[b].mass)) + (nodes[b].velocity * nodes[b].mass / (nodes[a].mass + nodes[a].mass));
+    nodes[a].mass = max(nodes[a].mass, nodes[b].mass);
+    nodes.removeAt(b);
   }
 
   // TODO: Fix
-  static void _addMutualForce(Point a, Point b) {
+  static void _addMutualForce(Node a, Node b) {
     // Determine magnitude of attraction (some pseudo science here)
     var attraction = 3 * a.mass * b.mass / (a.position-b.position).distanceSquared;
 
-    // Determine direction (based on the perspective of point 'a')
+    // Determine direction (based on the perspective of node 'a')
     var attractionX =
         (a.position.dx < b.position.dx) ? attraction : -attraction;
     var attractionY =
         (a.position.dy < b.position.dy) ? attraction : -attraction;
 
-    // Apply attraction to each point
+    // Apply attraction to each node
     var additiveForce = Offset(attractionX, attractionY);
     a.velocity += additiveForce;
     b.velocity += -additiveForce; // Equal, but opposite direction

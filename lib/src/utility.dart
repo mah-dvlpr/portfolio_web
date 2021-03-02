@@ -1,5 +1,5 @@
 /// Utility file with classes/functions that don't
-/// really belong anywhere specific.PointEngineDelegate
+/// really belong anywhere specific.NodeEngineDelegate
 
 import 'dart:math';
 
