@@ -136,14 +136,14 @@ class _BackdropPainter extends CustomPainter {
         _backgroundBrush);
 
     // For each node
-    for (int current = 0; current < _paintable.nodes.length; ++current) {
-      drawLinesToAllOtherNodes(canvas, _paintable.nodes[current]);
-      _paintable.nodes[current].draw(canvas, size);
+    for (int i = 0; i < _paintable.nodes.length; ++i) {
+      _drawLinesToAllOtherNodes(canvas, _paintable.nodes[i], i + 1);
+      _paintable.nodes[i].draw(canvas, size);
     }
 
     // Extra for user input
     if (_paintable.userNode != null) {
-      drawLinesToAllOtherNodes(canvas, _paintable.userNode);
+      _drawLinesToAllOtherNodes(canvas, _paintable.userNode, 0);
     }
   }
 
@@ -152,21 +152,17 @@ class _BackdropPainter extends CustomPainter {
     return oldDelegate != this;
   }
 
-  void drawLinesToAllOtherNodes(Canvas canvas, Node node) {
+  void _drawLinesToAllOtherNodes(Canvas canvas, Node node, int indexStart) {
     var linePaint = Paint();
-    for (final other in _paintable.nodes) {
-      if (other == node) {
-        continue;
-      }
-
-      var distance = (node.position-other.position).distance;
+    for (int i = indexStart; i < _paintable.nodes.length; ++i) {
+      var distance = (node.position-_paintable.nodes[i].position).distance;
       linePaint.color = Color.fromRGBO(
         backdropTheme.foregroundColor.red,
         backdropTheme.foregroundColor.green,
         backdropTheme.foregroundColor.blue,
         (distance < _lineDistanceLimit) ? 1.0 - distance / _lineDistanceLimit : 0);
 
-      canvas.drawLine(node.position, other.position, linePaint);
+      canvas.drawLine(node.position, _paintable.nodes[i].position, linePaint);
     }
   }
 }
