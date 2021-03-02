@@ -89,20 +89,21 @@ abstract class NodeEngine {
       for (int j = i + 1; j < nodes.length; ++j) {
         if (_areNodesTouching(nodes[i], nodes[j])) {
           _combineNodes(nodes, i, j, context);
+          break;
         } else {
           _addMutualForce(nodes[i], nodes[j]);
         }
       }
 
+      if (nodes[i] == null) { continue; }
+
       var size = MediaQuery.of(context).size;
-      for (int i = 0; i < nodes.length; ++i) {
-        nodes[i].position += nodes[i].velocity;
-        if (nodes[i].position.dx < 0 ||
-            nodes[i].position.dx > size.width ||
-            nodes[i].position.dy < 0 ||
-            nodes[i].position.dy > size.height) {
-          nodes.removeAt(i);
-        }
+      nodes[i].position += nodes[i].velocity;
+      if (nodes[i].position.dx < 0 ||
+          nodes[i].position.dx > size.width ||
+          nodes[i].position.dy < 0 ||
+          nodes[i].position.dy > size.height) {
+        nodes[i] = null;
       }
     }
   }
@@ -113,10 +114,10 @@ abstract class NodeEngine {
 
   static void _combineNodes(
       List<Node> nodes, int a, int b, BuildContext context) {
-    nodes[a].radiusTarget = max(nodes[a].radiusTarget, nodes[b].radiusTarget);
-    nodes[a].velocity = (nodes[a].velocity * nodes[a].mass / (nodes[a].mass + nodes[b].mass)) + (nodes[b].velocity * nodes[b].mass / (nodes[a].mass + nodes[a].mass));
-    nodes[a].mass = max(nodes[a].mass, nodes[b].mass);
-    nodes.removeAt(b);
+    nodes[b].radiusTarget = max(nodes[a].radiusTarget, nodes[b].radiusTarget);
+    nodes[b].velocity = (nodes[a].velocity * nodes[a].mass / (nodes[a].mass + nodes[b].mass)) + (nodes[b].velocity * nodes[b].mass / (nodes[a].mass + nodes[a].mass));
+    nodes[b].mass = max(nodes[a].mass, nodes[b].mass);
+    nodes[a] = null;
   }
 
   // TODO: Fix

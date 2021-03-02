@@ -23,7 +23,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   /// The density (number of nodes) per window area.
   /// Per (x * x) pixels we want z nodes.
   static const double _nodeDensity = 20 / (200 * 200);
-  static const int _nodesMax = 5;
+  static const int _nodesMax = 256;
   _Paintable _paintable;
 
   @override
@@ -76,8 +76,8 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 
   void _renderFrame() {
-    _regulateNodeAmount(_paintable.nodes);
     NodeEngine.updateNodes(_paintable.nodes, _context);
+    _regulateNodeAmount(_paintable.nodes);
     _streamController.add(_paintable);
   }
 
