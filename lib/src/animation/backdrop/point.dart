@@ -6,7 +6,7 @@ import 'theme.dart' as backdropTheme;
 
 class Point {
   static final random = Random();
-  final pointBrush = Paint()..color = backdropTheme.foregroundColor;
+  final pointBrush = Paint()..color = Colors.white;
   DateTime dateTime;
 
   /// Current position on canvas.
@@ -19,7 +19,7 @@ class Point {
   /// A Point grows...
   static const radiusNumberOfIncrements = 32;
   static const double radiusMin = 1.0;
-  static const double radiusMax = 3.0;
+  static const double radiusMax = 4.0;
   double radiusCurrent;
   double radiusTarget;
 
@@ -123,6 +123,7 @@ abstract class PointEngineDelegate {
   static void _combinePoints(
       List<Point> points, int a, int b, BuildContext context) {
     points[a].radiusTarget = max(points[a].radiusTarget, points[b].radiusTarget);
+    points[a].velocity = (points[a].velocity * points[a].mass / (points[a].mass + points[b].mass)) + (points[b].velocity * points[b].mass / (points[a].mass + points[a].mass));
     points[a].mass = max(points[a].mass, points[b].mass);
     points.removeAt(b);
   }

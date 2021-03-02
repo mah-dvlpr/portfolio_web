@@ -138,8 +138,8 @@ class _BackdropPainter extends CustomPainter {
 
     // For each point
     for (int current = 0; current < _paintable._points.length; ++current) {
-      _paintable._points[current].draw(canvas, size);
       drawLinesToAllOtherPoints(canvas, _paintable._points[current]);
+      _paintable._points[current].draw(canvas, size);
     }
 
     // Extra for user input
