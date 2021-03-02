@@ -22,7 +22,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
   /// The density (number of nodes) per window area.
   /// Per (x * x) pixels we want z nodes.
-  static const double _nodeDensity = 1 / (200 * 200);
+  static const double _nodeDensity = 20 / (200 * 200);
   static const int _nodesMax = 5;
   _Paintable _paintable;
 
@@ -89,14 +89,14 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
     // Either add nodes if node density is not reached, 
     // or remove nodes if we have too many.
-    for (int i = min(nodesMax, nodes.length); i < max(nodesMax, nodes.length); ++i) {
-      if (i < nodesMax) {
-        // Generate
-        nodes
-            .add(Node.getRandomNode(_context));
-      } else {
-        // Delete
-        nodes.removeRange(i, nodes.length);
+    int i;
+    for (i = 0; i < nodesMax; ++i) {
+      if (nodes.length < nodesMax) {
+        // Expand list and add new node.
+        nodes.add(Node.getRandomNode(_context));
+      } else if (i < nodes.length && nodes[i] == null) {
+        // Re-add a node to a nullified position in the list.
+        nodes[i] = Node.getRandomNode(_context);
       }
     }
   }
