@@ -84,34 +84,25 @@ abstract class NodeEngine {
     dateTime = DateTime.now();
 
     // Update nodes
-    _updateNodesVelocities(nodes, context);
-    _updateNodesPositions(nodes, context);
-  }
-
-  static _updateNodesVelocities(
-      List<Node> nodes, BuildContext context) {
     // For current node, update and apply force for every other node
-    for (int current = 0; current < nodes.length - 1; ++current) {
-      for (int other = current + 1; other < nodes.length; ++other) {
-        if (_areNodesTouching(nodes[current], nodes[other])) {
-          _combineNodes(nodes, current, other, context);
+    for (int i = 0; i < nodes.length - 1; ++i) {
+      for (int j = i + 1; j < nodes.length; ++j) {
+        if (_areNodesTouching(nodes[i], nodes[j])) {
+          _combineNodes(nodes, i, j, context);
         } else {
-          _addMutualForce(nodes[current], nodes[other]);
+          _addMutualForce(nodes[i], nodes[j]);
         }
       }
-    }
-  }
 
-  static _updateNodesPositions(List<Node> nodes, BuildContext context) {
-    var size = MediaQuery.of(context).size;
-
-    for (int i = 0; i < nodes.length; ++i) {
-      nodes[i].position += nodes[i].velocity;
-      if (nodes[i].position.dx < 0 ||
-          nodes[i].position.dx > size.width ||
-          nodes[i].position.dy < 0 ||
-          nodes[i].position.dy > size.height) {
-        nodes.removeAt(i);
+      var size = MediaQuery.of(context).size;
+      for (int i = 0; i < nodes.length; ++i) {
+        nodes[i].position += nodes[i].velocity;
+        if (nodes[i].position.dx < 0 ||
+            nodes[i].position.dx > size.width ||
+            nodes[i].position.dy < 0 ||
+            nodes[i].position.dy > size.height) {
+          nodes.removeAt(i);
+        }
       }
     }
   }
