@@ -3,7 +3,6 @@ import 'dart:ui';
 
 import 'package:flutter/material.dart';
 import 'theme.dart' as backdropTheme;
-import '../../utility.dart';
 
 class Point {
   static final random = Random();

@@ -20,7 +20,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   StreamController<_Paintable> _streamController;
 
   /// The density (number of points) per window area.
-  /// Per 200 * 200 I want 1 point(s).
+  /// Per (x * x) pixels we want z points.
   static const double _pointDensity = 1 / (200 * 200);
   static const int _pointsMax = 256;
   _Paintable _paintable;
