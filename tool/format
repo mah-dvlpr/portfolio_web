@@ -1,0 +1,2 @@
+#!/bin/bash
+dartfmt -l 80 -w --fix .
