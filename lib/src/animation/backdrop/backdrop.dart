@@ -22,7 +22,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
   /// The density (number of nodes) per window area.
   /// Per (x * x) pixels we want z nodes.
-  static const double _nodeDensity = 5 / (200 * 200);
+  static const double _nodeDensity = 1 / (200 * 200);
   static const int _nodesMax = 256;
   _Paintable _paintable;
 
