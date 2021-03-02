@@ -70,7 +70,7 @@ abstract class PointEngineDelegate {
   static DateTime dateTime = DateTime.now();
   // static const maxForce = 1.0;
   static const maxRadius =
-      5.0; // TODO: Might be better to just have this as max mass?
+      3.0; // TODO: Might be better to just have this as max mass?
 
   static updatePoints(List<Point> points, BuildContext context) {
     if (DateTime.now().difference(dateTime).inMilliseconds <

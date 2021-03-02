@@ -21,7 +21,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   /// The density (number of points) per window area.
   /// Per 200 * 200 I want 1 point(s).
   static const double _pointDensity = 1 / (200 * 200);
-  static const int _pointsMax = 256;
+  static const int _pointsMax = 3;
   List<Point> _points;
 
   BuildContext _context;
@@ -51,7 +51,9 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     var size = MediaQuery.of(_context).size;
 
     return GestureDetector(
-      onTapDown: _addPoint,
+      onTapDown: (details) => _addPointTap(details.localPosition),
+      onVerticalDragUpdate: (details) => _addPointDrag(details.localPosition),
+      onHorizontalDragUpdate: (details) => _addPointDrag(details.localPosition),
       child: StreamBuilder<List<Point>>(
         stream: _streamController.stream,
         builder: (context, snapshot) => SizedBox(
@@ -99,8 +101,13 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     }
   }
 
-  void _addPoint(TapDownDetails details) {
-    _points.replaceRange(0,0,[Point(details.localPosition, Offset(0, 0), PointEngineDelegate.maxRadius)]);
+  void _addPointTap(Offset localPosition) {
+    _points.replaceRange(0,0,[Point(localPosition, Offset(0, 0), PointEngineDelegate.maxRadius)]);
+  }
+
+  void _addPointDrag(Offset localPosition) {
+    
+    _points.replaceRange(_points.length-1,_points.length-1,[Point(localPosition, Offset(0, 0), PointEngineDelegate.maxRadius)]);
   }
 }
 
@@ -132,17 +139,14 @@ class _BackdropPainter extends CustomPainter {
       // Draw lines to all other points
       for (int other = current + 1; other < _points.length; ++other) {
         var p2 = _points[other];
-        var distance = hypotenuse(
-            p1.position.dx - p2.position.dx, p1.position.dy - p2.position.dy);
-        var lineOrNot =
-            (distance < _lineDistanceLimit) ? _lineDistanceLimit / distance : 0;
-        var linePaint = Paint()
-          ..color = Color.fromARGB(
-              256,
-              backdropTheme.foregroundColor.red,
-              backdropTheme.foregroundColor.green,
-              backdropTheme.foregroundColor.blue);
-        canvas.drawLine(p1.position, p2.position, linePaint);
+        var distance = (p1.position-p2.position).distance;
+        _linePaint.color = Color.fromRGBO(
+          backdropTheme.foregroundColor.red,
+          backdropTheme.foregroundColor.green,
+          backdropTheme.foregroundColor.blue,
+          (distance < _lineDistanceLimit) ? 1.0 - distance / _lineDistanceLimit : 0);
+
+        canvas.drawLine(p1.position, p2.position, _linePaint);
       }
     }
   }
