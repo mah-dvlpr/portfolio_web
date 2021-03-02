@@ -22,7 +22,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
   /// The density (number of nodes) per window area.
   /// Per (x * x) pixels we want z nodes.
-  static const double _nodeDensity = 20 / (200 * 200);
+  static const double _nodeDensity = 2 / (200 * 200);
   static const int _nodesMax = 256;
   _Paintable _paintable;
 
@@ -87,16 +87,24 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     var nodesMax = (size.width * size.height * _nodeDensity).toInt();
     nodesMax = min(nodesMax, _nodesMax);
 
-    // Either add nodes if node density is not reached, 
-    // or remove nodes if we have too many.
-    int i;
-    for (i = 0; i < nodesMax; ++i) {
-      if (nodes.length < nodesMax) {
-        // Expand list and add new node.
+    // Create nodes if list is not filled up until nodesMax
+    // Replace any nodes that have been set to null.
+    // If the list of nodes is too long (due to a window resize), shrink it.
+    for (int i = 0; i < nodesMax; ++i) {
+      if (i == nodes.length && i < nodesMax) {
+        // Create new node.
         nodes.add(Node.getRandomNode(_context));
-      } else if (i < nodes.length && nodes[i] == null) {
-        // Re-add a node to a nullified position in the list.
+      }
+
+      if (i < nodes.length && nodes[i] == null) {
+        // Replace nullified node.
         nodes[i] = Node.getRandomNode(_context);
+      }
+
+      if (i == nodesMax - 1) {
+        // Remove any extra nodes (after a window resize).
+        nodes.removeRange(i, nodes.length);
+        break;
       }
     }
   }
