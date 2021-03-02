@@ -22,7 +22,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
   /// The density (number of nodes) per window area.
   /// Per (x * x) pixels we want z nodes.
-  static const double _nodeDensity = 2 / (200 * 200);
+  static const double _nodeDensity = 5 / (200 * 200);
   static const int _nodesMax = 256;
   _Paintable _paintable;
 
@@ -127,7 +127,7 @@ class _Paintable {
 class _BackdropPainter extends CustomPainter {
   static final _backgroundBrush = Paint()
     ..color = backdropTheme.backgroundColor;
-  int _lineDistanceLimit = 200;
+  int _lineDistanceLimit = 100;
   _Paintable _paintable;
   BuildContext _context;
 
@@ -151,7 +151,7 @@ class _BackdropPainter extends CustomPainter {
 
     // Extra for user input
     if (_paintable.userNode != null) {
-      _drawLinesToAllOtherNodes(canvas, _paintable.userNode, 0);
+      _drawLinesToAllOtherNodes(canvas, _paintable.userNode, 0, true);
     }
   }
 
@@ -160,7 +160,8 @@ class _BackdropPainter extends CustomPainter {
     return oldDelegate != this;
   }
 
-  void _drawLinesToAllOtherNodes(Canvas canvas, Node node, int indexStart) {
+  void _drawLinesToAllOtherNodes(Canvas canvas, Node node, int indexStart,
+      [bool userNode = false]) {
     var linePaint = Paint();
     for (int i = indexStart; i < _paintable.nodes.length; ++i) {
       var distance = (node.position - _paintable.nodes[i].position).distance;
@@ -168,8 +169,8 @@ class _BackdropPainter extends CustomPainter {
           backdropTheme.foregroundColor.red,
           backdropTheme.foregroundColor.green,
           backdropTheme.foregroundColor.blue,
-          (distance < _lineDistanceLimit)
-              ? 1.0 - distance / _lineDistanceLimit
+          (distance < _lineDistanceLimit * ((userNode) ? 2 : 1))
+              ? 1.0 - distance / _lineDistanceLimit * ((userNode) ? 2 : 1)
               : 0);
 
       canvas.drawLine(node.position, _paintable.nodes[i].position, linePaint);
