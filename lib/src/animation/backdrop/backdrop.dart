@@ -6,7 +6,8 @@ import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
 import 'theme.dart' as backdropTheme;
 import 'point.dart';
-import '../../utility.dart';
+
+// TODO: Add documentation...
 
 class BackdropAnimation extends StatefulWidget {
   @override
@@ -16,13 +17,13 @@ class BackdropAnimation extends StatefulWidget {
 class _BackdropAnimationState extends State<BackdropAnimation>
     with SingleTickerProviderStateMixin {
   AnimationController _animationController;
-  StreamController<List<Point>> _streamController;
+  StreamController<_Paintable> _streamController;
 
   /// The density (number of points) per window area.
   /// Per 200 * 200 I want 1 point(s).
   static const double _pointDensity = 1 / (200 * 200);
-  static const int _pointsMax = 3;
-  List<Point> _points;
+  static const int _pointsMax = 256;
+  _Paintable _paintable;
 
   BuildContext _context;
 
@@ -38,8 +39,8 @@ class _BackdropAnimationState extends State<BackdropAnimation>
       _renderFrame();
     });
 
-    _streamController = StreamController<List<Point>>();
-    _points = <Point>[];
+    _streamController = StreamController<_Paintable>();
+    _paintable = _Paintable();
 
     // Start animation (+physics)
     _animationController.repeat();
@@ -51,10 +52,10 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     var size = MediaQuery.of(_context).size;
 
     return GestureDetector(
-      onTapDown: (details) => _addPointTap(details.localPosition),
-      onVerticalDragUpdate: (details) => _addPointDrag(details.localPosition),
-      onHorizontalDragUpdate: (details) => _addPointDrag(details.localPosition),
-      child: StreamBuilder<List<Point>>(
+      onPanStart: (details) => _addUserPoint(details.localPosition),
+      onPanUpdate: (details) => _addUserPoint(details.localPosition),
+      onPanEnd: (_) => _addUserPointToList(),
+      child: StreamBuilder<_Paintable>(
         stream: _streamController.stream,
         builder: (context, snapshot) => SizedBox(
           width: size.width,
@@ -76,9 +77,9 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 
   void _renderFrame() {
-    _regulateAmountOfPoints(_points);
-    PointEngineDelegate.updatePoints(_points, _context);
-    _streamController.add(_points);
+    _regulateAmountOfPoints(_paintable._points);
+    PointEngineDelegate.updatePoints(_paintable._points, _context);
+    _streamController.add(_paintable);
   }
 
   void _regulateAmountOfPoints(List<Point> points) {
@@ -92,34 +93,38 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     for (int i = min(pointsMax, points.length); i < max(pointsMax, points.length); ++i) {
       if (i < pointsMax) {
         // Generate
-        _points
-            .add(Point.getRandomPoint(PointEngineDelegate.maxRadius, _context));
+        points
+            .add(Point.getRandomPoint(_context));
       } else {
         // Delete
-        _points.removeRange(i, points.length);
+        points.removeRange(i, points.length);
       }
     }
   }
 
-  void _addPointTap(Offset localPosition) {
-    _points.replaceRange(0,0,[Point(localPosition, Offset(0, 0), PointEngineDelegate.maxRadius)]);
+  void _addUserPoint(Offset localPosition) {
+    _paintable._userPoint = Point(localPosition, Offset(0, 0), Point.radiusMax);
   }
 
-  void _addPointDrag(Offset localPosition) {
-    
-    _points.replaceRange(_points.length-1,_points.length-1,[Point(localPosition, Offset(0, 0), PointEngineDelegate.maxRadius)]);
+  void _addUserPointToList() {
+    _paintable._points.replaceRange(0, 0, [_paintable._userPoint]);
+    _paintable._userPoint = null;
   }
+}
+
+class _Paintable {
+  List<Point> _points = <Point>[];
+  Point _userPoint;
 }
 
 class _BackdropPainter extends CustomPainter {
   static final _backgroundBrush = Paint()
     ..color = backdropTheme.backgroundColor;
-  var _linePaint = Paint();
   int _lineDistanceLimit = 200;
-  List<Point> _points;
+  _Paintable _paintable;
   BuildContext _context;
 
-  _BackdropPainter(this._context, this._points);
+  _BackdropPainter(this._context, this._paintable);
 
   @override
   void paint(Canvas canvas, Size _) {
@@ -131,28 +136,38 @@ class _BackdropPainter extends CustomPainter {
             height: size.height),
         _backgroundBrush);
 
-    for (int current = 0; current < _points.length; ++current) {
-      // Draw point itself
-      var p1 = _points[current];
-      p1.draw(canvas, size);
+    // For each point
+    for (int current = 0; current < _paintable._points.length; ++current) {
+      _paintable._points[current].draw(canvas, size);
+      drawLinesToAllOtherPoints(canvas, _paintable._points[current]);
+    }
 
-      // Draw lines to all other points
-      for (int other = current + 1; other < _points.length; ++other) {
-        var p2 = _points[other];
-        var distance = (p1.position-p2.position).distance;
-        _linePaint.color = Color.fromRGBO(
-          backdropTheme.foregroundColor.red,
-          backdropTheme.foregroundColor.green,
-          backdropTheme.foregroundColor.blue,
-          (distance < _lineDistanceLimit) ? 1.0 - distance / _lineDistanceLimit : 0);
-
-        canvas.drawLine(p1.position, p2.position, _linePaint);
-      }
+    // Extra for user input
+    if (_paintable._userPoint != null) {
+      drawLinesToAllOtherPoints(canvas, _paintable._userPoint);
     }
   }
 
   @override
   bool shouldRepaint(_BackdropPainter oldDelegate) {
     return oldDelegate != this;
+  }
+
+  void drawLinesToAllOtherPoints(Canvas canvas, Point point) {
+    var linePaint = Paint();
+    for (final other in _paintable._points) {
+      if (other == point) {
+        continue;
+      }
+
+      var distance = (point.position-other.position).distance;
+      linePaint.color = Color.fromRGBO(
+        backdropTheme.foregroundColor.red,
+        backdropTheme.foregroundColor.green,
+        backdropTheme.foregroundColor.blue,
+        (distance < _lineDistanceLimit) ? 1.0 - distance / _lineDistanceLimit : 0);
+
+      canvas.drawLine(point.position, other.position, linePaint);
+    }
   }
 }
