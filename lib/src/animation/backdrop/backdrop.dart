@@ -18,7 +18,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     with SingleTickerProviderStateMixin {
   AnimationController _animationController;
   StreamController<_Paintable> _streamController;
-  BuildContext _context;
+  Size _size;
 
   /// The density (number of nodes) per window area.
   /// Per (x * x) pixels we want z nodes.
@@ -47,8 +47,8 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 
   @override
   Widget build(BuildContext context) {
-    _context = context;
-    var size = MediaQuery.of(_context).size;
+    _size = MediaQuery.of(context).size;
+    _paintable.size = _size;
 
     return GestureDetector(
       onPanStart: (details) => _addUserNode(details.localPosition),
@@ -56,11 +56,11 @@ class _BackdropAnimationState extends State<BackdropAnimation>
       onPanEnd: (_) => _addUserNodeToList(),
       child: StreamBuilder<_Paintable>(
         stream: _streamController.stream,
-        builder: (context, snapshot) => SizedBox(
-          width: size.width,
-          height: size.height,
+        builder: (_, snapshot) => SizedBox(
+          width: _size.width,
+          height: _size.height,
           child: CustomPaint(
-            painter: _BackdropPainter(context, snapshot.data),
+            painter: _BackdropPainter(snapshot.data),
             willChange: true,
           ),
         ),
@@ -76,15 +76,14 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   }
 
   void _renderFrame() {
-    NodeEngine.updateNodes(_paintable.nodes, _context);
+    NodeEngine.updateNodes(_paintable.nodes, _size);
     _regulateNodeAmount(_paintable.nodes);
     _streamController.add(_paintable);
   }
 
   void _regulateNodeAmount(List<Node> nodes) {
     // Determine suitable max amount of nodes depending on window size.
-    var size = MediaQuery.of(_context).size;
-    var nodesMax = (size.width * size.height * _nodeDensity).toInt();
+    var nodesMax = (_size.width * _size.height * _nodeDensity).toInt();
     nodesMax = min(nodesMax, _nodesMax);
 
     // Create nodes if list is not filled up until nodesMax
@@ -93,12 +92,12 @@ class _BackdropAnimationState extends State<BackdropAnimation>
     for (int i = 0; i < nodesMax; ++i) {
       if (i == nodes.length && i < nodesMax) {
         // Create new node.
-        nodes.add(Node.getRandomNode(_context));
+        nodes.add(Node.getRandomNode(_size));
       }
 
       if (i < nodes.length && nodes[i] == null) {
         // Replace nullified node.
-        nodes[i] = Node.getRandomNode(_context);
+        nodes[i] = Node.getRandomNode(_size);
       }
 
       if (i == nodesMax - 1) {
@@ -122,6 +121,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
 class _Paintable {
   List<Node> nodes = <Node>[];
   Node userNode;
+  Size size;
 }
 
 class _BackdropPainter extends CustomPainter {
@@ -129,24 +129,22 @@ class _BackdropPainter extends CustomPainter {
     ..color = backdropTheme.backgroundColor;
   int _lineDistanceLimit = 100;
   _Paintable _paintable;
-  BuildContext _context;
 
-  _BackdropPainter(this._context, this._paintable);
+  _BackdropPainter(this._paintable);
 
   @override
   void paint(Canvas canvas, Size _) {
-    var size = MediaQuery.of(_context).size;
     canvas.drawRect(
         Rect.fromCenter(
-            center: Offset(size.width / 2, size.height / 2),
-            width: size.width,
-            height: size.height),
+            center: Offset(_paintable.size.width / 2, _paintable.size.height / 2),
+            width: _paintable.size.width,
+            height: _paintable.size.height),
         _backgroundBrush);
 
     // For each node
     for (int i = 0; i < _paintable.nodes.length; ++i) {
       _drawLinesToAllOtherNodes(canvas, _paintable.nodes[i], i + 1);
-      _paintable.nodes[i].draw(canvas, size);
+      _paintable.nodes[i].draw(canvas, _paintable.size);
     }
 
     // Extra for user input

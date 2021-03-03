@@ -17,7 +17,7 @@ class Node {
   Offset velocity;
 
   /// A Node grows...
-  static const radiusNumberOfIncrements = 32;
+  static const radiusNumberOfIncrements = 64;
   static const double radiusMin = 1.0;
   static const double radiusMax = 4.0;
   double radiusCurrent;
@@ -36,8 +36,7 @@ class Node {
     this.mass = this.radiusCurrent;
   }
 
-  static Node getRandomNode(BuildContext context) {
-    var size = MediaQuery.of(context).size;
+  static Node getRandomNode(Size size) {
     var position = Offset(
         random.nextDouble() * size.width, random.nextDouble() * size.height);
 
@@ -76,7 +75,7 @@ class Node {
 abstract class NodeEngine {
   static DateTime dateTime = DateTime.now();
 
-  static updateNodes(List<Node> nodes, BuildContext context) {
+  static updateNodes(List<Node> nodes, Size size) {
     // Update time - Only render when wanted
     if (DateTime.now().difference(dateTime).inMilliseconds <
         backdropTheme.tickMilliTime60fps) {
@@ -89,7 +88,7 @@ abstract class NodeEngine {
     for (int i = 0; i < nodes.length; ++i) {
       for (int j = i + 1; j < nodes.length; ++j) {
         if (_areNodesTouching(nodes[i], nodes[j])) {
-          _combineNodes(nodes, i, j, context);
+          _combineNodes(nodes, i, j);
           break;
         } else {
           _addMutualForce(nodes[i], nodes[j]);
@@ -100,7 +99,6 @@ abstract class NodeEngine {
         continue;
       }
 
-      var size = MediaQuery.of(context).size;
       nodes[i].position += nodes[i].velocity;
       if (nodes[i].position.dx < 0 ||
           nodes[i].position.dx > size.width ||
@@ -117,7 +115,7 @@ abstract class NodeEngine {
   }
 
   static void _combineNodes(
-      List<Node> nodes, int a, int b, BuildContext context) {
+      List<Node> nodes, int a, int b) {
     nodes[b].radiusTarget = max(nodes[a].radiusTarget, nodes[b].radiusTarget);
     nodes[b].velocity = (nodes[a].velocity *
             nodes[a].mass /
