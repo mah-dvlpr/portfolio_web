@@ -1,10 +1,12 @@
 # Flutter Based Web Page Presenting My Software Portfolio
 This repo is meant to present, and be part of, my software portfolio.
 
-# How to run with Flutter directly
+## How to run with Flutter directly
+```
 flutter run --release -d chrome
+```
 
-# How to build and use with any server
+## How to build and use with any server
 run:
 ```
 cd 'path/to/this/project'  
