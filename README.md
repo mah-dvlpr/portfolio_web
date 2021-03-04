@@ -13,7 +13,7 @@ flutter build web
 
 Then set the servers root directory to the absolute path of 'path/to/this/project/build/web/'.
 
-With Flutter, you can run either:
+With Flutter, you can run:
 ```
 flutter pub global activate dhttpd
 flutter pub global run dhttpd --path 'path/to/this/project/build/web/'
