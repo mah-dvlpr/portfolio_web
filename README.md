@@ -1,6 +1,9 @@
 # Flutter Based Web Page Presenting My Software Portfolio
 This repo is meant to present, and be part of, my software portfolio.
 
+# How to run with Flutter directly
+flutter run --release -d chrome
+
 # How to build and use with any server
 run:
 ```
@@ -10,7 +13,7 @@ flutter build web
 
 Then set the servers root directory to the absolute path of 'path/to/this/project/build/web/'.
 
-With Flutter, you can run:
+With Flutter, you can run either:
 ```
 flutter pub global activate dhttpd
 flutter pub global run dhttpd --path 'path/to/this/project/build/web/'
