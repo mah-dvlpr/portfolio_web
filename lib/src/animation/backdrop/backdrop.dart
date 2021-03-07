@@ -23,7 +23,7 @@ class _BackdropAnimationState extends State<BackdropAnimation>
   /// The density (number of nodes) per window area.
   /// Per (x * x) pixels we want z nodes.
   static const double _nodeDensity = 1 / (200 * 200);
-  static const int _nodesMax = 256;
+  static const int _nodesMax = 1000;
   _Paintable _paintable;
 
   @override
@@ -136,7 +136,8 @@ class _BackdropPainter extends CustomPainter {
   void paint(Canvas canvas, Size _) {
     canvas.drawRect(
         Rect.fromCenter(
-            center: Offset(_paintable.size.width / 2, _paintable.size.height / 2),
+            center:
+                Offset(_paintable.size.width / 2, _paintable.size.height / 2),
             width: _paintable.size.width,
             height: _paintable.size.height),
         _backgroundBrush);
@@ -163,10 +164,12 @@ class _BackdropPainter extends CustomPainter {
     var linePaint = Paint();
     for (int i = indexStart; i < _paintable.nodes.length; ++i) {
       var distance = (node.position - _paintable.nodes[i].position).distance;
-      linePaint.color = Color.fromRGBO(
-          backdropTheme.foregroundColor.red,
-          backdropTheme.foregroundColor.green,
-          backdropTheme.foregroundColor.blue,
+
+      if (!userNode && distance >= _lineDistanceLimit) {
+        continue;
+      }
+
+      linePaint.color = backdropTheme.foregroundColor.withOpacity(
           (distance < _lineDistanceLimit * ((userNode) ? 2 : 1))
               ? 1.0 - distance / _lineDistanceLimit * ((userNode) ? 2 : 1)
               : 0);

@@ -114,8 +114,7 @@ abstract class NodeEngine {
         pow(a.radiusCurrent + b.radiusCurrent, 2);
   }
 
-  static void _combineNodes(
-      List<Node> nodes, int a, int b) {
+  static void _combineNodes(List<Node> nodes, int a, int b) {
     nodes[b].radiusTarget = max(nodes[a].radiusTarget, nodes[b].radiusTarget);
     nodes[b].velocity = (nodes[a].velocity *
             nodes[a].mass /
