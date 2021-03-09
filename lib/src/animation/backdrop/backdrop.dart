@@ -127,7 +127,7 @@ class _Paintable {
 class _BackdropPainter extends CustomPainter {
   static final _backgroundBrush = Paint()
     ..color = backdropTheme.backgroundColor;
-  int _lineDistanceLimit = 100;
+  static final _lineDistanceLimit = 100;
   _Paintable _paintable;
 
   _BackdropPainter(this._paintable);
@@ -167,12 +167,16 @@ class _BackdropPainter extends CustomPainter {
 
       if (!userNode && distance >= _lineDistanceLimit) {
         continue;
+      } else if (userNode && distance >= _lineDistanceLimit * 3) {
+        continue;
       }
 
       linePaint.color = backdropTheme.foregroundColor.withOpacity(
-          (distance < _lineDistanceLimit * ((userNode) ? 2 : 1))
-              ? 1.0 - distance / _lineDistanceLimit * ((userNode) ? 2 : 1)
-              : 0);
+        (!userNode) ?
+        1.0 - distance / _lineDistanceLimit
+        :
+        1.0 - distance / (3.0 * _lineDistanceLimit)
+      );
 
       canvas.drawLine(node.position, _paintable.nodes[i].position, linePaint);
     }
